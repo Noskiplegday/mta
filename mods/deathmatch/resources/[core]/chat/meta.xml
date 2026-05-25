@@ -1,0 +1,4 @@
+<meta>
+    <info author="VanCanhCity" type="script" description="Hệ thống Chat Roleplay và Lệnh Admin" />
+    <script src="server.lua" type="server" />
+</meta>

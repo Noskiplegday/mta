@@ -1,0 +1,7 @@
+<meta>
+    <info author="MTA Developer" type="script" description="Database Connection" />
+    
+    <script src="connection.lua" type="server" />
+    
+    <export function="getConnection" type="server" />
+</meta>

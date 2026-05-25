@@ -1,0 +1,5 @@
+<meta>
+    <info author="VanCanhCity" type="script" description="Hệ thống nhân vật" />
+    <script src="server.lua" type="server" />
+      <export function="loadPlayerCharacter" type="server"/>
+</meta>
