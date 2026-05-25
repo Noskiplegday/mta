@@ -1,7 +1,10 @@
--- Tạo lệnh /trogiup hoặc /help để mở menu
+-- Hàm xử lý khi người chơi gõ lệnh
 function requestHelpMenu(thePlayer)
-    -- Gửi tín hiệu kích hoạt giao diện qua client của người chơi đó
+    -- Gửi sự kiện kích hoạt UI sang Client của người chơi đó
     triggerClientEvent(thePlayer, "triggerHelpUI", thePlayer)
 end
-addCommandHandler("trogiup", requestHelpMenu)
+
+-- Đăng ký các lệnh mở/tắt hệ thống trợ giúp
 addCommandHandler("help", requestHelpMenu)
+addCommandHandler("trogiup", requestHelpMenu)
+addCommandHandler("idhelp", requestHelpMenu) -- Thêm lệnh tắt dự phòng

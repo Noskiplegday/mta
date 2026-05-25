@@ -1,5 +1,5 @@
 <meta>
-    <info author="YourName" type="script" version="1.0.0" />
+    <info author="VanCanhCity" type="script" description="He thong tro giup giao dien UI" />
     <script src="server.lua" type="server" />
     <script src="client.lua" type="client" />
 </meta>

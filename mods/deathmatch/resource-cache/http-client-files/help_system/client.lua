@@ -2,71 +2,81 @@ local helpWindow = nil
 local categoryList = nil
 local contentMemo = nil
 
--- Dữ liệu hướng dẫn (Có thể tự do chỉnh sửa nội dung)
+-- CHUYỂN SANG DẠNG MẢNG CÓ THỨ TỰ (Chắc chắn 100% không bị lỗi mất dữ liệu khi load)
 local helpData = {
-    ["Luật Server"] = "1. Không được DM (Deathmatch).\n2. Không được phép Powergaming (PG).\n3. Luôn tuân thủ luật Roleplay.",
-    ["Lệnh Cơ Bản"] = "/me [hành động]: Biểu thị hành động nhân vật.\n/do [trạng thái]: Mô tả trạng thái môi trường.\n/b [nội dung]: Kênh chat OOC ngoài đời thực.",
-    ["Hệ thống Việc Làm"] = "Hãy đến Tòa Thị Chính (City Hall) trên bản đồ để nhận các công việc như: Giao báo, Thợ mỏ, Trucker để kiếm tiền.",
-    ["Trợ giúp Tài Khoản"] = "Nếu gặp lỗi hoặc bị kẹt, hãy sử dụng lệnh /report [nội dung] để gửi yêu cầu hỗ trợ đến Admin."
+    { category = "1. Luat Server", text = "1. Luon tuan thu cac quy tac Roleplay chung.\n2. Khong lam dung loi game (Bug Abuse).\n3. Ton trong nguoi choi khac khi chat OOC." },
+    { category = "2. Lenh Chat Roleplay", text = "/me [hanh dong]: Dien ta hanh dong cua nhan vat.\nVi du: /me lay vi tien ra tu tui quan.\n\n/do [trang thai]: Mo ta moi truong hoac trang thai nhan vat.\nVi du: /do Vi tien co nhan hieu Nike mau den.\n\n/b [noi dung]: Chat ngoai doi thuc (OOC)." },
+    { category = "3. Tai Khoan Nhan Vat", text = "He thong tu dong luu va tai du lieu nhan vat qua MySQL.\nTai san, vi tri va thong tin cua ban se duoc bao mat tuyet doi." },
+    { category = "4. Lenh Admin Tool", text = "Danh rieng cho Ban Quan Tri:\n/tp [Ten/ID] - Dich chuyen den nguoi choi.\n/kick [Ten/ID] [Ly do] - Duoi nguoi choi khoi server.\n/ban [Ten/ID] [Ly do] - Khoa tai khoan nguoi choi." },
+    { category = "5. He Thong Khac", text = "He thong Tui do (Inventory) va Ngan hang (Economy) dang duoc hoan thien.\nSu dung phim tat theo huong dan tren man hinh de tuong tac." }
 }
 
--- Hàm khởi tạo giao diện
+-- Ham tao giao dien tro giup
 function createHelpWindow()
     if helpWindow then return end
 
-    -- Lấy độ phân giải màn hình
+    -- Lay do phan giai man hinh de can giua
     local sW, sH = guiGetScreenSize()
-    local wW, wH = 600, 400
+    local wW, wH = 600, 420
     local wX, wY = (sW - wW) / 2, (sH - wH) / 2
 
-    -- Tạo cửa sổ chính
-    helpWindow = guiCreateWindow(wX, wY, wW, wH, "HỆ THỐNG TRỢ GIÚP - ROLEPLAY", false)
+    -- Cua so chinh
+    helpWindow = guiCreateWindow(wX, wY, wW, wH, "HE THONG TRO GIUP SERVER - ROLEPLAY", false)
     guiWindowSetSizable(helpWindow, false)
 
-    -- Tạo danh sách danh mục (Bên trái)
-    categoryList = guiCreateGridList(10, 30, 180, 320, false, helpWindow)
-    local column = guiCreateGridListAddColumn(categoryList, "Danh Mục Trợ Giúp", 0.85)
+    -- Bang danh muc ben trai
+    categoryList = guiCreateGridList(15, 35, 180, 310, false, helpWindow)
+    local column = guiCreateGridListAddColumn(categoryList, "Danh Muc", 0.85)
 
-    -- Tạo ô hiển thị nội dung (Bên phải)
-    contentMemo = guiCreateMemo(200, 30, 390, 320, "Vui lòng chọn một danh mục bên trái để xem hướng dẫn.", false, helpWindow)
+    -- O hien thi noi dung ben phai
+    contentMemo = guiCreateMemo(210, 35, 375, 310, "Vui long chon mot danh muc ben trai de xem huong dan chi tiet.", false, helpWindow)
     guiMemoSetReadOnly(contentMemo, true)
 
-    -- Nút đóng cửa sổ
-    local closeButton = guiCreateButton(250, 360, 100, 30, "Đóng", false, helpWindow)
+    -- Nut dong menu
+    local closeButton = guiCreateButton(240, 365, 120, 35, "DONG MENU (X)", false, helpWindow)
 
-    -- Thêm dữ liệu vào Gridlist
-    for category, _ in pairs(helpData) do
+    -- SỬ DỤNG VÒNG LẶP IPAIRS: Duyệt dữ liệu theo đúng số thứ tự từ 1 đến 5
+    for i, data in ipairs(helpData) do
         local row = guiCreateGridListAddRow(categoryList)
-        guiCreateGridListSetItemText(categoryList, row, column, category, false, false)
+        guiCreateGridListSetItemText(categoryList, row, column, data.category, false, false)
     end
 
-    -- Sự kiện khi click vào danh mục
+    -- Dang ky cac su kien click chuot
     addEventHandler("onClientGUIClick", categoryList, updateHelpContent, false)
-    
-    -- Sự kiện khi bấm nút Đóng
     addEventHandler("onClientGUIClick", closeButton, toggleHelpWindow, false)
 end
 
--- Hàm cập nhật nội dung khi chọn danh mục
+-- Ham cap nhat text khi click vao danh muc
 function updateHelpContent()
     local selectedRow, selectedColumn = guiGridListGetSelectedItem(categoryList)
-    if selectedRow ~= -1 then
+    if selectedRow and selectedRow ~= -1 then
         local categoryName = guiGridListGetItemText(categoryList, selectedRow, selectedColumn)
-        local text = helpData[categoryName] or ""
+        
+        -- Tim kiem text phu hop trong mang helpData
+        local text = ""
+        for i, data in ipairs(helpData) do
+            if data.category == categoryName then
+                text = data.text
+                break
+            end
+        end
         guiSetText(contentMemo, text)
     end
 end
 
--- Hàm bật/tắt giao diện
+-- Ham Bat / Tat giao dien (Tu dong quan ly chuot)
 function toggleHelpWindow()
     if not helpWindow then
         createHelpWindow()
-        showCursor(true)
+        showCursor(true) -- Hien chuot khi mo bảng
     else
         destroyElement(helpWindow)
         helpWindow = nil
-        showCursor(false)
+        showCursor(false) -- An chuot khi tat bảng
     end
 end
-addEvent("triggerHelpUI", true)
-addEventHandler("triggerHelpUI", root, toggleHelpWindow)
+
+-- ĐƯA COMMANDHANDLER VỀ CLIENT: Đảm bảo gõ lệnh nào cũng nhận ngay lập tức
+addCommandHandler("help", toggleHelpWindow)
+addCommandHandler("trogiup", toggleHelpWindow)
+addCommandHandler("idhelp", toggleHelpWindow)
