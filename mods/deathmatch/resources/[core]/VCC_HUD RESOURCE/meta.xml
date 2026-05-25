@@ -1,0 +1,5 @@
+<meta>
+    <info author="VanCanhCity" type="script" name="vcc_hud" description="Van Canh City HUD - Health/Hunger/Thirst"/>
+    <script src="client.lua" type="client"/>
+    <script src="server.lua" type="server"/>
+</meta>

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Van Canh City - Loading</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --red:#c0392b;--red-b:#e74c3c;--red-g:rgba(192,57,43,0.6);
+  --green:#27ae60;--green-b:#2ecc71;
+  --gold:#f39c12;
+}
+body{
+  width:100vw;height:100vh;
+  background:#080000;
+  font-family:'Rajdhani',sans-serif;
+  overflow:hidden;color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+
+.bg{
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse at 50% 30%, rgba(150,20,10,0.5) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(100,10,5,0.3) 0%, transparent 50%),
+    #080000;
+}
+
+/* Animated background rings */
+.rings{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;}
+.ring{
+  position:absolute;border-radius:50%;border:1px solid rgba(192,57,43,0.15);
+  transform:translate(-50%,-50%);
+  animation:ringPulse 4s ease-in-out infinite;
+}
+.ring:nth-child(1){width:400px;height:400px;animation-delay:0s;}
+.ring:nth-child(2){width:600px;height:600px;animation-delay:0.5s;border-style:dashed;}
+.ring:nth-child(3){width:800px;height:800px;animation-delay:1s;}
+.ring:nth-child(4){width:1000px;height:1000px;animation-delay:1.5s;border-style:dashed;}
+@keyframes ringPulse{
+  0%,100%{opacity:0.2;transform:translate(-50%,-50%) scale(0.98)}
+  50%{opacity:0.6;transform:translate(-50%,-50%) scale(1)}
+}
+
+.content{position:relative;z-index:10;text-align:center;width:500px;}
+
+/* BIG LOGO */
+.big-logo{
+  font-family:'Cinzel',serif;
+  font-size:64px;font-weight:900;letter-spacing:8px;
+  background:linear-gradient(135deg, #fff 0%, var(--red-b) 40%, var(--gold) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  line-height:1;margin-bottom:8px;
+  animation:logoBreathe 3s ease-in-out infinite;
+}
+@keyframes logoBreathe{
+  0%,100%{filter:drop-shadow(0 0 20px rgba(192,57,43,0.5))}
+  50%{filter:drop-shadow(0 0 40px rgba(192,57,43,0.9))}
+}
+.big-sub{
+  font-size:14px;letter-spacing:10px;color:var(--red);
+  text-transform:uppercase;margin-bottom:6px;opacity:0.8;
+}
+.tagline{
+  font-size:13px;letter-spacing:3px;color:rgba(255,255,255,0.3);
+  margin-bottom:50px;
+}
+
+/* LOADING BAR */
+.load-wrap{width:100%;margin-bottom:16px;}
+.load-track{
+  height:3px;background:rgba(255,255,255,0.06);
+  border-radius:3px;overflow:hidden;position:relative;
+}
+.load-fill{
+  height:100%;width:0%;background:linear-gradient(90deg, var(--red), var(--red-b), var(--gold));
+  border-radius:3px;transition:width 0.3s ease;
+  box-shadow:0 0 10px var(--red-g);
+  position:relative;
+}
+.load-fill::after{
+  content:'';position:absolute;right:0;top:0;bottom:0;width:20px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3));
+  animation:shimmer 0.8s ease-in-out infinite;
+}
+@keyframes shimmer{from{opacity:0}to{opacity:1}}
+
+.load-info{
+  display:flex;justify-content:space-between;
+  margin-top:10px;font-size:12px;letter-spacing:2px;
+  color:rgba(255,255,255,0.35);text-transform:uppercase;
+}
+.load-pct{color:var(--red-b);font-weight:700;font-size:14px;}
+
+/* DOTS */
+.dots{display:flex;gap:8px;justify-content:center;margin-top:30px;}
+.dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,0.15);
+  animation:dotAnim 1.4s ease-in-out infinite;
+}
+.dot:nth-child(1){animation-delay:0s;background:var(--red);}
+.dot:nth-child(2){animation-delay:0.2s;background:var(--red-b);}
+.dot:nth-child(3){animation-delay:0.4s;}
+@keyframes dotAnim{
+  0%,80%,100%{transform:scale(1);opacity:0.4}
+  40%{transform:scale(1.5);opacity:1}
+}
+
+/* TIPS */
+.tip-box{
+  margin-top:40px;padding:16px 24px;
+  border:1px solid rgba(192,57,43,0.2);
+  border-radius:8px;
+  background:rgba(192,57,43,0.05);
+  font-size:13px;color:rgba(255,255,255,0.5);
+  letter-spacing:1px;line-height:1.6;
+  animation:tipFade 0.5s ease;
+}
+.tip-label{color:var(--gold);font-weight:700;letter-spacing:3px;font-size:11px;margin-bottom:6px;}
+@keyframes tipFade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* BOTTOM */
+.bottom{
+  position:fixed;bottom:20px;
+  display:flex;gap:30px;
+  font-size:11px;letter-spacing:3px;color:rgba(255,255,255,0.15);
+  text-transform:uppercase;
+}
+.bottom span{cursor:default;}
+
+/* Particles */
+.particle{
+  position:fixed;pointer-events:none;
+  width:2px;height:2px;border-radius:50%;background:var(--red-b);
+  animation:flt linear infinite;opacity:0;
+}
+@keyframes flt{
+  0%{opacity:0;transform:translateY(100vh)}
+  10%{opacity:0.6}
+  90%{opacity:0.6}
+  100%{opacity:0;transform:translateY(-50px)}
+}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="rings">
+  <div class="ring"></div><div class="ring"></div>
+  <div class="ring"></div><div class="ring"></div>
+</div>
+<div id="pWrap"></div>
+
+<div class="content">
+  <div class="big-logo">VAN CANH</div>
+  <div class="big-sub">City Roleplay</div>
+  <div class="tagline">Nơi mỗi câu chuyện đều có giá trị</div>
+
+  <div class="load-wrap">
+    <div class="load-track">
+      <div class="load-fill" id="loadFill"></div>
+    </div>
+    <div class="load-info">
+      <span id="loadStatus">Đang kết nối server...</span>
+      <span class="load-pct" id="loadPct">0%</span>
+    </div>
+  </div>
+
+  <div class="dots">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+  </div>
+
+  <div class="tip-box" id="tipBox">
+    <div class="tip-label">💡 Mẹo</div>
+    <div id="tipText">Sử dụng /help để xem danh sách các lệnh trong game.</div>
+  </div>
+</div>
+
+<div class="bottom">
+  <span>Van Canh City</span>
+  <span>MTA:SA Roleplay</span>
+  <span>v2.0</span>
+</div>
+
+<script>
+// Particles
+const pw=document.getElementById('pWrap');
+for(let i=0;i<20;i++){
+  const p=document.createElement('div');
+  p.className='particle';
+  p.style.left=Math.random()*100+'%';
+  p.style.animationDuration=(10+Math.random()*15)+'s';
+  p.style.animationDelay=Math.random()*12+'s';
+  pw.appendChild(p);
+}
+
+const tips=[
+  "Sử dụng /help để xem danh sách các lệnh trong game.",
+  "Roleplay tốt sẽ được thưởng EXP và tiền thưởng!",
+  "Đừng quên ăn uống, nhân vật của bạn cần năng lượng.",
+  "Liên hệ admin qua /report nếu gặp vấn đề.",
+  "Giao dịch tại chợ trung tâm để mua bán vật phẩm.",
+  "Tham gia faction để có nhiều nhiệm vụ hơn.",
+  "Máu thấp? Hãy ra bệnh viện hoặc dùng thuốc.",
+  "Xe hỏng có thể sửa tại garage hoặc gọi thợ sửa xe.",
+];
+const statuses=[
+  "Đang tải dữ liệu người chơi...",
+  "Đang khởi tạo bản đồ...",
+  "Đang tải nhân vật...",
+  "Đang kết nối database...",
+  "Hoàn tất! Chào mừng đến Van Canh City!",
+];
+
+let pct=0, tipI=0;
+const fill=document.getElementById('loadFill');
+const pctEl=document.getElementById('loadPct');
+const statusEl=document.getElementById('loadStatus');
+const tipEl=document.getElementById('tipText');
+const tipBox=document.getElementById('tipBox');
+
+// Rotate tips
+setInterval(()=>{
+  tipI=(tipI+1)%tips.length;
+  tipBox.style.animation='none';
+  void tipBox.offsetWidth;
+  tipBox.style.animation='tipFade 0.5s ease';
+  tipEl.textContent=tips[tipI];
+}, 4000);
+
+// Progress - will be controlled by Lua via setLoadProgress
+function setLoadProgress(p, status) {
+  pct = Math.min(Math.max(p, 0), 100);
+  fill.style.width = pct + '%';
+  pctEl.textContent = Math.round(pct) + '%';
+  if(status) statusEl.textContent = status;
+}
+
+// Demo animation if not in MTA
+if(!window.mta) {
+  let dp=0;
+  const iv=setInterval(()=>{
+    dp+=Math.random()*3;
+    const si=Math.floor((dp/100)*statuses.length);
+    setLoadProgress(dp, statuses[Math.min(si,statuses.length-1)]);
+    if(dp>=100){clearInterval(iv);}
+  },150);
+}
+</script>
+</body>
+</html>

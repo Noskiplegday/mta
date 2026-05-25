@@ -1094,3 +1094,29 @@
 [2026-05-25 11:55:12] JOIN: Luu-dev joined the game (IP: 127.0.0.1)
 [2026-05-25 11:55:13] NICK: Luu-dev is now known as User_1011
 [2026-05-25 11:55:49] QUIT: User_1011 left the game [Quit] 
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : VanCanhCity Roleplay
+= Server IP address: auto
+= Server port      : 22010
+= 
+= Log file         : ..IENT/server/mods/deathmatch/logs/server.log
+= Maximum players  : 500
+= HTTP port        : 22011
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-05-25 12:43:22] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-05-25 12:43:23] Resources: 210 loaded, 0 failed
+[2026-05-25 12:43:23] Starting resources...
+[2026-05-25 12:43:23] INFO: [MYSQL] Ket noi database thanh cong!
+[2026-05-25 12:43:23] ERROR: Couldn't find resource loading_screen. Check it exists.
+[2026-05-25 12:43:23] ERROR: Couldn't find resource login_system. Check it exists.
+[2026-05-25 12:43:23] INFO: [VEHICLE] Hệ thống xe đã sẵn sàng. Người chơi dùng /spawnveh để gọi xe!
+[2026-05-25 12:43:23] Authorized serial account protection is DISABLED. See http://multitheftauto.com/authserial
+[2026-05-25 12:43:23] WARNING: <owner_email_address> not set
+[2026-05-25 12:43:23] Server started and is ready to accept connections!
+[2026-05-25 12:43:23] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-05-25 12:43:23] Type 'help' for a list of commands.
+[2026-05-25 12:43:23] INFO: [VEHICLE] Da tai tat ca xe tu database len map!

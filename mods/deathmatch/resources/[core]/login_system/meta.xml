@@ -1,4 +1,0 @@
-<meta>
-    <info author="VanCanhCity" type="script" description="UI Login bằng GUI" />
-    <script src="client.lua" type="client" />
-</meta>

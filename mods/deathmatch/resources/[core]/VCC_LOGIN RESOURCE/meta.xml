@@ -1,0 +1,7 @@
+<meta>
+    <info author="VanCanhCity" type="script" name="vcc_login" description="Van Canh City Login UI"/>
+    <script src="client.lua" type="client"/>
+    <script src="server.lua" type="server"/>
+    <file src="login.html"/>
+    <file src="login.css"/>
+</meta>
