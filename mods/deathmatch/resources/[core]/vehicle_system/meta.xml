@@ -1,0 +1,4 @@
+<meta>
+    <info author="VanCanhCity" type="script" description="Advanced Vehicle System with MySQL Saving" version="1.0.0" />
+    <script src="server.lua" type="server" />
+</meta>

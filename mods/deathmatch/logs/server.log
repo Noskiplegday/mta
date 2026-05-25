@@ -190,3 +190,65 @@
 [2026-05-25 09:41:10] CONNECT: Luu-dev connected (IP: 127.0.0.1  Serial: 0F4E85E282F61C0EBAAAB903A1341CA4  Version: 1.6.0-9.24106.0)
 [2026-05-25 09:41:10] JOIN: Luu-dev joined the game (IP: 127.0.0.1)
 [2026-05-25 09:41:10] NICK: Luu-dev is now known as User_1011
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : VanCanhCity Roleplay
+= Server IP address: auto
+= Server port      : 22010
+= 
+= Log file         : ..IENT/server/mods/deathmatch/logs/server.log
+= Maximum players  : 500
+= HTTP port        : 22011
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-05-25 10:14:42] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-05-25 10:14:43] Resources: 208 loaded, 0 failed
+[2026-05-25 10:14:43] Starting resources...
+[2026-05-25 10:14:43] INFO: [MYSQL] Ket noi database thanh cong!
+[2026-05-25 10:14:43] Authorized serial account protection is DISABLED. See http://multitheftauto.com/authserial
+[2026-05-25 10:14:43] WARNING: <owner_email_address> not set
+[2026-05-25 10:14:43] Server started and is ready to accept connections!
+[2026-05-25 10:14:43] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-05-25 10:14:43] Type 'help' for a list of commands.
+[2026-05-25 10:14:43] INFO: [VEHICLE] Da tai tat ca xe tu database len map!
+[2026-05-25 10:14:49] CONNECT: Luu-dev connected (IP: 127.0.0.1  Serial: 0F4E85E282F61C0EBAAAB903A1341CA4  Version: 1.6.0-9.24106.0)
+[2026-05-25 10:14:49] JOIN: Luu-dev joined the game (IP: 127.0.0.1)
+[2026-05-25 10:14:49] NICK: Luu-dev is now known as User_1011
+[2026-05-25 10:16:51] start: Requested by Console
+[2026-05-25 10:16:51] Starting inventory
+[2026-05-25 10:16:51] start: Resource 'inventory' started
+[2026-05-25 10:18:21] QUIT: User_1011 left the game [Quit] 
+==================================================================
+= Multi Theft Auto: San Andreas v1.6
+==================================================================
+= Server name      : VanCanhCity Roleplay
+= Server IP address: auto
+= Server port      : 22010
+= 
+= Log file         : ..IENT/server/mods/deathmatch/logs/server.log
+= Maximum players  : 500
+= HTTP port        : 22011
+= Voice Chat       : Disabled
+= Bandwidth saving : Medium
+==================================================================
+[2026-05-25 10:25:23] Resource 'runcode' requests some acl rights. Use the command 'aclrequest list runcode'
+[2026-05-25 10:25:24] Resources: 209 loaded, 0 failed
+[2026-05-25 10:25:24] Starting resources...
+[2026-05-25 10:25:24] INFO: [MYSQL] Ket noi database thanh cong!
+[2026-05-25 10:25:24] Authorized serial account protection is DISABLED. See http://multitheftauto.com/authserial
+[2026-05-25 10:25:24] WARNING: <owner_email_address> not set
+[2026-05-25 10:25:24] Server started and is ready to accept connections!
+[2026-05-25 10:25:24] To stop the server, type 'shutdown' or press Ctrl-C
+[2026-05-25 10:25:24] Type 'help' for a list of commands.
+[2026-05-25 10:25:24] INFO: [VEHICLE] Da tai tat ca xe tu database len map!
+[2026-05-25 10:25:29] CONNECT: Luu-dev connected (IP: 127.0.0.1  Serial: 0F4E85E282F61C0EBAAAB903A1341CA4  Version: 1.6.0-9.24106.0)
+[2026-05-25 10:25:30] JOIN: Luu-dev joined the game (IP: 127.0.0.1)
+[2026-05-25 10:25:30] NICK: Luu-dev is now known as User_1011
+[2026-05-25 10:26:02] start: Requested by Console
+[2026-05-25 10:26:02] Starting vehicle_system
+[2026-05-25 10:26:02] SCRIPT ERROR: [core]\vehicle_system\server.lua:87: 'in' expected near 'do'
+[2026-05-25 10:26:02] ERROR: Loading script failed: [core]\vehicle_system\server.lua:87: 'in' expected near 'do'
+[2026-05-25 10:26:02] start: Resource 'vehicle_system' started
+[2026-05-25 10:26:47] QUIT: User_1011 left the game [Quit] 
