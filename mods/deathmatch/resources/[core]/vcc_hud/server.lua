@@ -82,3 +82,13 @@ function vcc_setThirst(player, val)
         triggerClientEvent(player, "vcc:updateHUD", player, {thirst = playerData[player].thirst})
     end
 end
+
+function vcc_getHunger(player)
+    if playerData[player] then return playerData[player].hunger end
+    return 100
+end
+
+function vcc_getThirst(player)
+    if playerData[player] then return playerData[player].thirst end
+    return 100
+end

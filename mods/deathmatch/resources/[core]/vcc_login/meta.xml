@@ -3,5 +3,4 @@
     <script src="client.lua" type="client"/>
     <script src="server.lua" type="server"/>
     <file src="login.html"/>
-    <file src="login.css"/>
 </meta>

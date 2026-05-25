@@ -23,7 +23,7 @@ local DEFAULT_ITEMS = {
     {id="nuoc_ngot",  qty=1},
     {id="com_hop",    qty=1},
     {id="thuoc_bong", qty=4},
-    {id:"kit_cuu_thuong",qty=1},
+    {id="kit_cuu_thuong",qty=1},
     {id="dao_kiem",   qty=1},
     {id="sung_luc",   qty=1},
     {id="ban_do",     qty=1},
@@ -90,16 +90,22 @@ addEventHandler("vcc:useItem", root, function(itemId, qty)
         end
         -- Apply hunger/thirst via HUD resource
         if eff.hunger and eff.hunger > 0 then
-            if exports.vcc_hud then
-                exports.vcc_hud:vcc_setHunger(player, 
-                    (exports.vcc_hud:vcc_getHunger and exports.vcc_hud:vcc_getHunger(player) or 50) + eff.hunger)
-            end
+            local ok, currentHunger = pcall(function()
+                return exports.vcc_hud:vcc_getHunger(player)
+            end)
+            local hunger = (ok and currentHunger) or 50
+            pcall(function()
+                exports.vcc_hud:vcc_setHunger(player, hunger + eff.hunger)
+            end)
         end
         if eff.thirst and eff.thirst > 0 then
-            if exports.vcc_hud then
-                exports.vcc_hud:vcc_setThirst(player,
-                    (exports.vcc_hud:vcc_getThirst and exports.vcc_hud:vcc_getThirst(player) or 50) + eff.thirst)
-            end
+            local ok, currentThirst = pcall(function()
+                return exports.vcc_hud:vcc_getThirst(player)
+            end)
+            local thirst = (ok and currentThirst) or 50
+            pcall(function()
+                exports.vcc_hud:vcc_setThirst(player, thirst + eff.thirst)
+            end)
         end
     end
 
