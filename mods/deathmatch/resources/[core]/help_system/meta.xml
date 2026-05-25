@@ -1,5 +1,4 @@
 <meta>
-    <info author="VanCanhCity" type="script" description="He thong tro giup giao dien UI" />
-    <script src="server.lua" type="server" />
+    <info author="VanCanhCity" type="script" description="He thong tro giup" />
     <script src="client.lua" type="client" />
 </meta>

@@ -1,0 +1,5 @@
+<meta>
+    <info author="VanCanhCity" type="script" description="Màn hình tải game" />
+    <script src="client.lua" type="client" />
+    <file src="background.png" />
+</meta>
