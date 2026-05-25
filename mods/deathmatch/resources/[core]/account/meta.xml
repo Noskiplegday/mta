@@ -2,4 +2,4 @@
     <info author="VanCanhCity" type="script" description="Hệ thống tài khoản" />
 
     <script src="server.lua" type="server" />
-</meta>a
+</meta>
