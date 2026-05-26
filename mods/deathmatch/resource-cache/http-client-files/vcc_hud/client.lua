@@ -154,9 +154,10 @@ addEventHandler("onClientRender", root, function()
         drawPulseWarning(panelX + 5, panelY - 54*scale, "⚠ KHÁT!")
     end
 
-    -- == TOP RIGHT: Clock + Server Info ==
+    -- == RIGHT SIDE: Clock + Server Info (Dời xuống để chừa chỗ cho Radar góc phải trên) ==
     local tr_x = screenW - 130*scale
-    local tr_y = 14*scale
+    local tr_y = 260*scale -- Đã sửa đổi tọa độ Y xuống dưới
+    
     local hh, mm, ss = tostring(os.date("%H")), tostring(os.date("%M")), tostring(os.date("%S"))
     local timeStr = hh..":"..mm
     dxDrawRectangle(tr_x - 8*scale, tr_y - 6*scale, 125*scale, 32*scale, tocolor(5,0,0,180))
@@ -203,4 +204,10 @@ addEventHandler("onClientResourceStart", resourceRoot, function()
     setPlayerHudComponentVisible("health", false)
     setPlayerHudComponentVisible("armour", false)
     setPlayerHudComponentVisible("money", false)
+    
+    -- Thêm các lệnh ẩn thành phần mặc định
+    setPlayerHudComponentVisible("weapon", false)
+    setPlayerHudComponentVisible("ammo", false)
+    setPlayerHudComponentVisible("clock", false)
+    setPlayerHudComponentVisible("radar", false) -- Ẩn Minimap mặc định để chuẩn bị dùng custom radar
 end)

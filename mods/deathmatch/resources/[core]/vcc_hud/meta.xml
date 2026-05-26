@@ -1,9 +1,0 @@
-<meta>
-    <info author="VanCanhCity" type="script" name="vcc_hud" description="Van Canh City HUD - Health/Hunger/Thirst"/>
-    <script src="client.lua" type="client"/>
-    <script src="server.lua" type="server"/>
-    <export function="vcc_setHunger" type="server"/>
-    <export function="vcc_setThirst" type="server"/>
-    <export function="vcc_getHunger" type="server"/>
-    <export function="vcc_getThirst" type="server"/>
-</meta>

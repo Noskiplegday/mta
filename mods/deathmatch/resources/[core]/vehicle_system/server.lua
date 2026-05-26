@@ -62,11 +62,14 @@ addCommandHandler("spawnveh", function(player, cmd)
                     setVehicleColor(veh, row.color_r, row.color_g, row.color_b)
                     setVehicleLocked(veh, row.locked == 1)
                     
+                    -- Mặc định xe gọi ra sẽ tắt máy để tránh tốn xăng lúc chưa lên xe
+                    setVehicleEngineState(veh, false)
+                    
                     setElementData(veh, "veh:id", row.id)
                     setElementData(veh, "veh:owner", charID)
-                    setElementData(veh, "veh:fuel", row.fuel or 100) -- Nạp dữ liệu xăng từ DB [Tính năng 2]
+                    setElementData(veh, "veh:fuel", row.fuel or 100) -- Nạp dữ liệu xăng từ DB
                     
-                    outputChatBox("#00FF00[Xe Cá Nhân] Đã gọi xe thành công về vị trí bến đỗ!", player, 255, 255, 255, true)
+                    outputChatBox("#E74C3C[Xe Cá Nhân] Đã gọi xe thành công về vị trí bến đỗ!", player, 255, 255, 255, true)
                 end
             end
         else
@@ -135,7 +138,7 @@ addCommandHandler("park", function(player, cmd)
     dbExec(db, "UPDATE vehicles SET pos_x = ?, pos_y = ?, pos_z = ?, pos_rot = ?, fuel = ? WHERE id = ?", 
         x, y, z, rot, fuel, dbID)
 
-    outputChatBox("#00FF00[Bến Đỗ] Đã đặt vị trí này làm bến đỗ mặc định cho xe thành công!", player, 255, 255, 255, true)
+    outputChatBox("#E74C3C[Bến Đỗ] Đã đặt vị trí này làm bến đỗ mặc định cho xe thành công!", player, 255, 255, 255, true)
 end)
 
 -- [TÍNH NĂNG 2]: LỆNH ĐỔ XĂNG (/refuel) tại cây xăng
@@ -163,7 +166,7 @@ addCommandHandler("refuel", function(player, cmd)
 
     takePlayerMoney(player, cost)
     setElementData(veh, "veh:fuel", 100)
-    outputChatBox("#00FF00[Cây Xăng] Đã nạp đầy bình xăng thành công! Chi phí: " .. cost .. "$", player, 255, 255, 255, true)
+    outputChatBox("#E74C3C[Cây Xăng] Đã nạp đầy bình xăng thành công! Chi phí: " .. cost .. "$", player, 255, 255, 255, true)
 end)
 
 -- 2. LỆNH MUA XE VẪN GIỮ NGUYÊN FORM CŨ
@@ -199,6 +202,7 @@ addCommandHandler("buyvehicle", function(player, cmd, modelID)
             local veh = createVehicle(lastVeh.model, lastVeh.pos_x, lastVeh.pos_y, lastVeh.pos_z, 0, 0, lastVeh.pos_rot)
             
             if veh then
+                setVehicleEngineState(veh, false)
                 setElementData(veh, "veh:id", lastVeh.id)
                 setElementData(veh, "veh:owner", charID) 
                 setElementData(veh, "veh:fuel", 100)
@@ -208,20 +212,27 @@ addCommandHandler("buyvehicle", function(player, cmd, modelID)
     end, db, "SELECT * FROM vehicles WHERE char_id = ? ORDER BY id DESC LIMIT 1", charID)
 end)
 
--- 4. LOGIC KHÓA / MỞ KHÓA XE (Phím K) GIỮ NGUYÊN FORM CŨ
-addCommandHandler("lockvehicle", function(player, cmd)
+-- 4. LOGIC KHÓA / MỞ KHÓA XE (Phím K)
+function toggleVehicleLock(player)
     local charID = getElementData(player, "char:id")
     if not charID then return end
 
     local px, py, pz = getElementPosition(player)
     local targetVehicle = nil
 
-    for _, veh in ipairs(getElementsByType("vehicle")) do
-        local vx, vy, vz = getElementPosition(veh)
-        if getDistanceBetweenPoints3D(px, py, pz, vx, vy, vz) <= 4 then
-            if getElementData(veh, "veh:owner") == charID then
-                targetVehicle = veh
-                break
+    -- Kiểm tra nếu đang ngồi trong xe
+    local currentVeh = getPedOccupiedVehicle(player)
+    if currentVeh and getElementData(currentVeh, "veh:owner") == charID then
+        targetVehicle = currentVeh
+    else
+        -- Kiểm tra bán kính 4m xung quanh
+        for _, veh in ipairs(getElementsByType("vehicle")) do
+            local vx, vy, vz = getElementPosition(veh)
+            if getDistanceBetweenPoints3D(px, py, pz, vx, vy, vz) <= 4 then
+                if getElementData(veh, "veh:owner") == charID then
+                    targetVehicle = veh
+                    break
+                end
             end
         end
     end
@@ -237,6 +248,110 @@ addCommandHandler("lockvehicle", function(player, cmd)
         end
     else
         outputChatBox("#FF0000[Lỗi] Không tìm thấy chiếc xe nào của bạn ở gần đây!", player, 255, 255, 255, true)
+    end
+end
+addCommandHandler("lockvehicle", toggleVehicleLock)
+
+-- 5. LỆNH ĐIỀU KHIỂN ĐỘNG CƠ XE (Phím M)
+addCommandHandler("engine", function(player, cmd)
+    local veh = getPedOccupiedVehicle(player)
+    if not veh then 
+        outputChatBox("#FF0000[Lỗi] Bạn phải ngồi trên xe mới có thể bật/tắt động cơ!", player, 255, 255, 255, true)
+        return 
+    end
+
+    if getVehicleController(veh) ~= player then return end
+
+    local charID = getElementData(player, "char:id")
+    if getElementData(veh, "veh:owner") ~= charID then
+        outputChatBox("#FF0000[Lỗi] Bạn không phải là chủ sở hữu chiếc xe này!", player, 255, 255, 255, true)
+        return
+    end
+
+    local fuel = getElementData(veh, "veh:fuel") or 100
+    if fuel <= 0 then
+        outputChatBox("#FF0000[Lỗi] Xe đã cạn kiệt nhiên liệu, không thể khởi động!", player, 255, 255, 255, true)
+        return
+    end
+
+    local currentState = getVehicleEngineState(veh)
+    setVehicleEngineState(veh, not currentState)
+    if currentState then
+        outputChatBox("#FF9900* Bạn đã tắt động cơ phương tiện. *", player, 255, 255, 255, true)
+    else
+        outputChatBox("#00FF00* Động cơ phương tiện đã được khởi động. *", player, 255, 255, 255, true)
+    end
+end)
+
+-- 6. LỆNH THẮT DÂY AN TOÀN (Phím G)
+addCommandHandler("seatbelt", function(player, cmd)
+    local veh = getPedOccupiedVehicle(player)
+    if not veh then 
+        outputChatBox("#FF0000[Lỗi] Bạn phải ngồi trong xe mới sử dụng được dây an toàn!", player, 255, 255, 255, true)
+        return 
+    end
+
+    local currentBelt = getElementData(player, "seatbelt") or false
+    setElementData(player, "seatbelt", not currentBelt)
+    if currentBelt then
+        outputChatBox("#FF9900* Bạn đã tháo dây an toàn. *", player, 255, 255, 255, true)
+    else
+        outputChatBox("#00FF00* Bạn đã thắt dây an toàn chặt chẽ. *", player, 255, 255, 255, true)
+    end
+end)
+
+-- 7. LỆNH MỞ/ĐÓNG NẮP CAPO (/hood)
+addCommandHandler("hood", function(player, cmd)
+    local veh = getPedOccupiedVehicle(player)
+    if not veh or getVehicleController(veh) ~= player then return end
+
+    local currentRatio = getVehicleOpenRatio(veh, 0)
+    if currentRatio == 0 then
+        setVehicleOpenRatio(veh, 0, 1, 500)
+        outputChatBox("#00FF00* Bạn đã mở nắp capo xe. *", player, 255, 255, 255, true)
+    else
+        setVehicleOpenRatio(veh, 0, 0, 500)
+        outputChatBox("#FF9900* Bạn đã đóng nắp capo xe. *", player, 255, 255, 255, true)
+    end
+end)
+
+-- 8. LỆNH MỞ/ĐÓNG CỐP XE (/trunk)
+addCommandHandler("trunk", function(player, cmd)
+    local veh = getPedOccupiedVehicle(player)
+    if not veh or getVehicleController(veh) ~= player then return end
+
+    local currentRatio = getVehicleOpenRatio(veh, 1)
+    if currentRatio == 0 then
+        setVehicleOpenRatio(veh, 1, 1, 500)
+        outputChatBox("#00FF00* Bạn đã mở cốp xe. *", player, 255, 255, 255, true)
+    else
+        setVehicleOpenRatio(veh, 1, 0, 500)
+        outputChatBox("#FF9900* Bạn đã đóng cốp xe. *", player, 255, 255, 255, true)
+    end
+end)
+
+-- 9. LỆNH BẬT/TẮT ĐÈN XE THỦ CÔNG (/lights)
+addCommandHandler("lights", function(player, cmd)
+    local veh = getPedOccupiedVehicle(player)
+    if not veh or getVehicleController(veh) ~= player then return end
+
+    local currentLights = getVehicleOverrideLights(veh)
+    if currentLights == 2 then
+        setVehicleOverrideLights(veh, 1)
+        outputChatBox("#FF9900* Bạn đã tắt đèn xe. *", player, 255, 255, 255, true)
+    else
+        setVehicleOverrideLights(veh, 2)
+        outputChatBox("#00FF00* Bạn đã bật đèn xe. *", player, 255, 255, 255, true)
+    end
+end)
+
+-- ─── BỘ NHẬN TÍN HIỆU PHÍM TẮT TỪ CLIENT GỬI LÊN ──────────────────
+addEvent("vcc_vehicle:triggerCommand", true)
+addEventHandler("vcc_vehicle:triggerCommand", root, function(cmdName)
+    if cmdName == "lock" then
+        toggleVehicleLock(source)
+    else
+        executeCommandHandler(cmdName, source)
     end
 end)
 

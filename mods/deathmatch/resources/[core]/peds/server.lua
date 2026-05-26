@@ -1,0 +1,2 @@
+-- peds/server.lua
+-- (Bạn cứ xóa sạch các dòng code báo lỗi cũ đi và để trống file này nhé)

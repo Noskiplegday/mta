@@ -67,7 +67,7 @@ addCommandHandler("gotopos", function(player, cmd, x, y, z)
     -- Tạm thời chưa check quyền admin, cho bạn toàn quyền dùng để test map
     if x and y and z then
         setElementPosition(player, tonumber(x), tonumber(y), tonumber(z))
-        outputChatBox("[Admin] Bạn đã dịch chuyển đến tọa độ: " .. x .. ", " .. y .. ", " .. z, player, 0, 255, 0)
+        outputChatBox("[Admin] Bạn đã dịch chuyển đến tọa độ: " .. x .. ", " .. y .. ", " .. z, player, 231, 76, 60)
     else
         outputChatBox("Cú pháp: /gotopos [X] [Y] [Z]", player, 255, 0, 0)
     end

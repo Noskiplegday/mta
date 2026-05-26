@@ -1,101 +1,131 @@
-local helpWindow = nil
-local categoryList = nil
-local contentMemo = nil
+-- vcc_help/help_client.lua
+local screenW, screenH = guiGetScreenSize()
+local scale = screenH / 768 -- Responsive scale
 
--- Mảng dữ liệu gốc của bạn (Giữ nguyên 5 danh mục cũ)
-local helpData = {
-    { category = "1. Luat Server", text = "1. Luon tuan thu cac quy tac Roleplay chung.\n2. Khong lam dung loi game (Bug Abuse).\n3. Ton trong nguoi choi khac khi chat OOC." },
-    { category = "2. Lenh Chat Roleplay", text = "/me [hanh dong]: Dien ta hanh dong cua nhan vat.\nVi du: /me lay vi tien ra tu tui quan.\n\n/do [trang thai]: Mo ta moi truong hoac trang thai nhan vat.\nVi du: /do Vi tien co nhan hieu Nike mau den.\n\n/b [noi dung]: Chat ngoai doi thuc (OOC)." },
-    { category = "3. Tai Khoan Nhan Vat", text = "He thong tu dong luu va tai du lieu nhan vat qua MySQL.\nTai san, vi tri va thong tin cua ban se duoc bao mat tuyet doi." },
-    { category = "4. Lenh Admin Tool", text = "Danh rieng cho Ban Quan Tri:\n/tp [Ten/ID] - Dich chuyen den nguoi choi.\n/kick [Ten/ID] [Ly do] - Duoi nguoi choi khoi server.\n/ban [Ten/ID] [Ly do] - Khoa tai khoan nguoi choi." },
-    { category = "5. He Thong Khac", text = "He thong Tui do (Inventory) va Ngan hang (Economy) dang duoc hoan thien.\nSu dung phim tat theo huong dan tren man hinh de tuong tact." }
+local isHelpOpen = false
+local currentTab = "xe" -- Tab mặc định khi mở lên
+
+-- Danh sách lệnh chia theo các chuyên mục
+local helpCommands = {
+    xe = {
+        title = "HỆ THỐNG LỆNH XE CỘ",
+        commands = {
+            { cmd = "/engine hoặc nút M", desc = "Bật / Tắt động cơ phương tiện" },
+            { cmd = "/lock hoặc nút K", desc = "Khóa / Mở khóa cửa xe cá nhân" },
+            { cmd = "/seatbelt hoặc nút G", desc = "Thắt / Tháo dây an toàn khi ngồi trên xe" },
+            { cmd = "/hood", desc = "Mở / Đóng nắp capo xe" },
+            { cmd = "/trunk", desc = "Mở / Đóng cốp xe (Cất/lấy đồ đạc)" },
+            { cmd = "/lights", desc = "Bật / Tắt đèn pha thủ công" },
+            { cmd = "/eject [ID/Tên]", desc = "Đuổi hành khách ra khỏi xe của bạn" },
+        }
+    },
+    ban_than = {
+        title = "LỆNH CÁ NHÂN & CHUNG",
+        commands = {
+            { cmd = "/an", desc = "Ăn thức ăn để hồi phục thanh Đói" },
+            { cmd = "/uong", desc = "Uống nước để hồi phục thanh Khát" },
+            { cmd = "/id", desc = "Xem ID của bản thân và người chơi xung quanh" },
+            { cmd = "/pay [ID] [Số tiền]", desc = "Chuyển tiền mặt cho người đứng gần" },
+            { cmd = "Phím F7", desc = "Ẩn / Hiện thanh giao diện (HUD)" },
+            { cmd = "Phím T hoặc `", desc = "Mở khung Chat hệ thống" },
+        }
+    }
 }
 
--- HÀM TỰ ĐỘNG QUÉT TOÀN BỘ LỆNH ĐANG CHẠY TRÊN SERVER
-function taiTatCaLenhServer()
-    local textLenh = "DANH SÁCH TẤT CẢ CÁC LỆNH ĐANG HOẠT ĐỘNG:\n"
-    textLenh = textLenh .. "=====================================\n\n"
+-- Hàm vẽ bo góc đơn giản
+local function drawRoundRect(x, y, w, h, col)
+    dxDrawRectangle(x, y, w, h, col)
+end
+
+addEventHandler("onClientRender", root, function()
+    if not isHelpOpen then return end
+
+    -- Cấu hình kích thước bảng Help
+    local w, h = 550 * scale, 400 * scale
+    local x, y = (screenW - w) / 2, (screenH - h) / 2
+
+    -- Khung nền chính (Đen mờ biên Neon Đỏ)
+    drawRoundRect(x, y, w, h, tocolor(10, 10, 10, 230))
+    dxDrawRectangle(x, y, w, 2 * scale, tocolor(231, 76, 60, 255)) -- Viền trên Neon Đỏ
+    dxDrawRectangle(x, y + h - 2*scale, w, 2 * scale, tocolor(231, 76, 60, 100))
+
+    -- Tiêu đề bảng
+    dxDrawText("VAN CANH CITY — BẢNG TRỢ GIÚP", x, y + 15 * scale, x + w, y + 40 * scale, 
+        tocolor(255, 255, 255, 255), scale * 1.2, "default-bold", "center", "top")
     
-    local allCommands = getCommandHandlers()
-    if allCommands and #allCommands > 0 then
-        local count = 0
-        for _, commandData in ipairs(allCommands) do
-            local cmdName = commandData[1]
-            if cmdName ~= "say" and cmdName ~= "me" and cmdName ~= "register" and cmdName ~= "msg" then
-                textLenh = textLenh .. "👉 /" .. cmdName .. "\n"
-                count = count + 1
-            end
-        end
-        textLenh = textLenh .. "\nTổng cộng phát hiện: " .. count .. " lệnh đang chạy."
-    else
-        textLenh = textLenh .. "[Lỗi] Không thể quét được dữ liệu lệnh từ hệ thống!"
-    end
-    return textLenh
-end
+    -- Gợi ý đóng bảng
+    dxDrawText("Bấm [ F1 ] để ĐÓNG bảng", x, y + h - 25 * scale, x + w, y + h, 
+        tocolor(150, 150, 150, 255), scale * 0.75, "default-bold", "center", "top")
 
--- Ham tao giao dien tro giup
-function createHelpWindow()
-    if helpWindow then return end
+    -- ─── VẼ TAB CHỌN ───
+    local tabW = 140 * scale
+    local tabH = 30 * scale
+    
+    -- Tab Xe Cộ
+    local tabXeColor = currentTab == "xe" and tocolor(231, 76, 60, 255) or tocolor(40, 40, 40, 255)
+    drawRoundRect(x + 20 * scale, y + 55 * scale, tabW, tabH, tabXeColor)
+    dxDrawText("🚗 Lệnh Xe Cộ", x + 20 * scale, y + 55 * scale, x + 20 * scale + tabW, y + 55 * scale + tabH,
+        tocolor(255, 255, 255, 255), scale * 0.85, "default-bold", "center", "center")
 
-    local lenhQuetDuoc = taiTatCaLenhServer()
-    if helpData[6] then table.remove(helpData, 6) end
-    table.insert(helpData, { category = "6. Lệnh Hệ Thống", text = lenhQuetDuoc })
+    -- Tab Bản Thân
+    local tabUserColor = currentTab == "ban_than" and tocolor(231, 76, 60, 255) or tocolor(40, 40, 40, 255)
+    drawRoundRect(x + 170 * scale, y + 55 * scale, tabW, tabH, tabUserColor)
+    dxDrawText("👤 Lệnh Cá Nhân", x + 170 * scale, y + 55 * scale, x + 170 * scale + tabW, y + 55 * scale + tabH,
+        tocolor(255, 255, 255, 255), scale * 0.85, "default-bold", "center", "center")
 
-    local sW, sH = guiGetScreenSize()
-    local wW, wH = 600, 420
-    local wX, wY = (sW - wW) / 2, (sH - wH) / 2
+    -- ─── HIỂN THỊ NỘI DUNG LỆNH THEO TAB ───
+    local activeData = helpCommands[currentTab]
+    if activeData then
+        -- Tiêu đề của phân mục
+        dxDrawText(activeData.title, x + 25 * scale, y + 105 * scale, x + w, y + 130 * scale,
+            tocolor(231, 76, 60, 255), scale * 0.9, "default-bold", "left")
 
-    helpWindow = guiCreateWindow(wX, wY, wW, wH, "HE THONG TRO GIUP SERVER - ROLEPLAY", false)
-    guiWindowSetSizable(helpWindow, false)
+        -- Vòng lặp in danh sách lệnh ngoài màn hình
+        local startY = y + 130 * scale
+        for i, item in ipairs(activeData.commands) do
+            local itemY = startY + (i - 1) * 32 * scale
+            
+            -- Nền dòng (xen kẽ màu đen/xám mờ cho dễ nhìn)
+            local rowBg = (i % 2 == 0) and tocolor(20, 20, 20, 150) or tocolor(30, 30, 30, 150)
+            dxDrawRectangle(x + 20 * scale, itemY, w - 40 * scale, 26 * scale, rowBg)
 
-    categoryList = guiCreateGridList(15, 35, 180, 310, false, helpWindow)
-    local column = guiGridListAddColumn(categoryList, "Danh Muc", 0.85)
-
-    contentMemo = guiCreateMemo(210, 35, 375, 310, "Vui long chon mot danh muc ben trai de xem huong dan chi tiet.", false, helpWindow)
-    guiMemoSetReadOnly(contentMemo, true)
-
-    local closeButton = guiCreateButton(240, 365, 120, 35, "DONG MENU (X)", false, helpWindow)
-
-    for i, data in ipairs(helpData) do
-        local row = guiGridListAddRow(categoryList)
-        guiGridListSetItemText(categoryList, row, column, data.category, false, false)
-    end
-
-    addEventHandler("onClientGUIClick", categoryList, updateHelpContent, false)
-    addEventHandler("onClientGUIClick", closeButton, toggleHelpWindow, false)
-end
-
--- Ham cap nhat text khi click vao danh muc
-function updateHelpContent()
-    local selectedRow, selectedColumn = guiGridListGetSelectedItem(categoryList)
-    if selectedRow and selectedRow ~= -1 then
-        local categoryName = guiGridListGetItemText(categoryList, selectedRow, selectedColumn)
-        for i, data in ipairs(helpData) do
-            if data.category == categoryName then
-                guiSetText(contentMemo, data.text)
-                break
-            end
+            -- Cột Lệnh (Màu xanh sáng / Trắng)
+            dxDrawText(item.cmd, x + 30 * scale, itemY, x + 200 * scale, itemY + 26 * scale,
+                tocolor(231, 76, 60, 255), scale * 0.8, "default-bold", "left", "center")
+            
+            -- Cột Mô tả tính năng
+            dxDrawText("➔ " .. item.desc, x + 210 * scale, itemY, x + w - 30 * scale, itemY + 26 * scale,
+                tocolor(220, 220, 220, 255), scale * 0.8, "default", "left", "center")
         end
     end
-end
+end)
 
--- Ham Bat / Tat giao dien (Tu dong quan ly chuot)
-function toggleHelpWindow()
-    if not helpWindow then
-        createHelpWindow()
-        showCursor(true)
-    else
-        destroyElement(helpWindow)
-        helpWindow = nil
-        showCursor(false)
+-- Xử lý click chuột để chuyển đổi qua lại giữa các Tab
+addEventHandler("onClientClick", root, function(button, state, absoluteX, absoluteY)
+    if not isHelpOpen or state ~= "down" or button ~= "left" then return end
+
+    local w, h = 550 * scale, 400 * scale
+    local x, y = (screenW - w) / 2, (screenH - h) / 2
+    local tabW, tabH = 140 * scale, 30 * scale
+
+    -- Check click Tab Xe
+    if absoluteX >= x + 20 * scale and absoluteX <= x + 20 * scale + tabW and
+       absoluteY >= y + 55 * scale and absoluteY <= y + 55 * scale + tabH then
+        currentTab = "xe"
+        playSoundFrontEnd(41)
     end
-end
 
--- Đăng ký các lệnh hoạt động chính thức
-addCommandHandler("trogiup", toggleHelpWindow)
-addCommandHandler("idhelp", toggleHelpWindow)
+    -- Check click Tab Cá Nhân
+    if absoluteX >= x + 170 * scale and absoluteX <= x + 170 * scale + tabW and
+       absoluteY >= y + 55 * scale and absoluteY <= y + 55 * scale + tabH then
+        currentTab = "ban_than"
+        playSoundFrontEnd(41)
+    end
+end)
 
--- Tự động dọn dẹp tắt chuột nếu resource bị quản trị viên restart hoặc người chơi bị out đột ngột
-addEventHandler("onClientResourceStop", resourceRoot, function()
-    showCursor(false)
+-- Bấm F1 để bật tắt menu Trợ giúp
+bindKey("F1", "down", function()
+    isHelpOpen = not isHelpOpen
+    showCursor(isHelpOpen) -- Hiện chuột khi mở bảng để người chơi click đổi tab
+    playSoundFrontEnd(isHelpOpen and 11 or 12)
 end)

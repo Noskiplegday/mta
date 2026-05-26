@@ -1,4 +1,5 @@
 <meta>
-    <info author="VanCanhCity" type="script" description="He thong tro giup" />
-    <script src="client.lua" type="client" />
+    <info author="VanCanhCity" type="script" name="help_system" description="He thong tro giup kiem lenh xe"/>
+    
+    <script src="client.lua" type="client"/>
 </meta>

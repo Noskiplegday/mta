@@ -1,6 +1,0 @@
-<meta>
-    <info author="VanCanhCity" type="script" name="vcc_inventory" description="Van Canh City Inventory UI"/>
-    <script src="client.lua" type="client"/>
-    <script src="server.lua" type="server"/>
-    <file src="inventory.html"/>
-</meta>

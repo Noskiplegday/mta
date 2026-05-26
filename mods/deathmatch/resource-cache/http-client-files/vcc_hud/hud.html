@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>VCC HUD</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Orbitron:wght@400;700;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:transparent}
+body{font-family:'Rajdhani',sans-serif;user-select:none}
+
+:root{
+  --red:#c0392b;
+  --red-glow:rgba(192,57,43,0.6);
+  --red-dim:rgba(192,57,43,0.18);
+  --red-border:rgba(192,57,43,0.25);
+  --panel-bg:rgba(0,0,0,0.65);
+  --text:rgba(255,255,255,0.9);
+  --text-dim:rgba(255,255,255,0.4);
+}
+
+/* ─── SCAN LINES ─── */
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,0,0,0.01) 3px,rgba(255,0,0,0.01) 4px);
+}
+
+/* ─── PLAYER CARD - top left ─── */
+#player-card{
+  position:fixed;top:18px;left:18px;z-index:10;
+  background:var(--panel-bg);
+  border:1px solid var(--red-border);
+  border-radius:10px;padding:8px 13px;
+  display:flex;align-items:center;gap:10px;
+  backdrop-filter:blur(4px);
+}
+.avatar{
+  width:36px;height:36px;border-radius:50%;
+  border:2px solid rgba(192,57,43,0.5);
+  background:var(--red-dim);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;
+  color:var(--red);flex-shrink:0;
+}
+.pname{font-size:13px;font-weight:700;color:var(--text)}
+.pid{font-size:10px;color:var(--text-dim);margin-top:1px}
+.job-pill{
+  display:inline-block;margin-top:3px;
+  font-size:9px;font-weight:700;letter-spacing:1px;
+  padding:1px 8px;border-radius:20px;
+  background:var(--red-dim);color:var(--red);
+  border:1px solid var(--red-border);
+}
+
+/* ─── INFO CHIPS - top right ─── */
+#info-panel{
+  position:fixed;top:18px;right:18px;z-index:10;
+  display:flex;flex-direction:column;gap:5px;align-items:flex-end;
+}
+.chip{
+  background:var(--panel-bg);
+  border:1px solid var(--red-border);
+  border-radius:8px;padding:5px 11px;
+  display:flex;align-items:center;gap:7px;
+  font-size:12px;font-weight:600;color:var(--text);
+  backdrop-filter:blur(4px);
+}
+.ic{font-size:13px;opacity:0.5;line-height:1}
+.c-green{color:#27ae60}.c-blue{color:#3498db}
+.c-yellow{color:rgba(255,200,80,0.9)}.c-dim{color:var(--text-dim);font-size:10px;font-weight:400}
+.c-time{color:var(--text);font-family:'Orbitron',sans-serif;font-size:11px}
+
+/* ─── VITALS - bottom left ─── */
+#vitals{
+  position:fixed;bottom:22px;left:18px;z-index:10;
+  display:flex;flex-direction:column;gap:7px;
+}
+.bar-row{display:flex;align-items:center;gap:8px}
+.b-ic{width:18px;height:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.b-ic svg{width:16px;height:16px}
+.b-track{
+  width:150px;height:5px;
+  background:rgba(255,255,255,0.07);
+  border-radius:3px;overflow:hidden;
+}
+.b-fill{height:100%;border-radius:3px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.b-hp   {background:#c0392b;box-shadow:0 0 8px rgba(192,57,43,0.7)}
+.b-armor{background:#2980b9;box-shadow:0 0 8px rgba(41,128,185,0.7)}
+.b-food {background:#e67e22;box-shadow:0 0 8px rgba(230,126,34,0.7)}
+.b-water{background:#16a085;box-shadow:0 0 8px rgba(22,160,133,0.7)}
+.b-num{font-size:11px;color:var(--text-dim);font-weight:600;min-width:24px;text-align:right}
+
+/* ─── SPEEDOMETER - bottom center ─── */
+#speedo{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:10;
+  background:var(--panel-bg);
+  border:1px solid var(--red-border);
+  border-radius:14px;padding:10px 18px;
+  display:flex;align-items:center;gap:16px;
+  backdrop-filter:blur(4px);
+  opacity:0;transition:opacity .3s;
+}
+#speedo.active{opacity:1}
+.arc-wrap{position:relative;width:84px;height:84px}
+.arc-wrap svg{width:84px;height:84px}
+.arc-num{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  text-align:center;
+}
+.arc-val{font-family:'Orbitron',sans-serif;font-size:21px;font-weight:900;color:#fff;display:block;line-height:1}
+.arc-unit{font-size:8px;color:var(--text-dim);letter-spacing:1.5px}
+.s-div{width:1px;height:58px;background:var(--red-border)}
+.gear-col{display:flex;flex-direction:column;align-items:center;gap:2px}
+.gear-lbl{font-size:9px;letter-spacing:2px;color:var(--text-dim)}
+.gear-val{font-family:'Orbitron',sans-serif;font-size:30px;font-weight:900;color:var(--red);line-height:1}
+.eng-badge{
+  font-size:9px;font-weight:700;letter-spacing:1.5px;
+  padding:2px 8px;border-radius:20px;
+  background:rgba(46,204,113,0.15);color:#2ecc71;
+  border:1px solid rgba(46,204,113,0.3);
+}
+.eng-badge.off{background:rgba(192,57,43,0.15);color:var(--red);border-color:var(--red-border)}
+.fuel-col{display:flex;flex-direction:column;align-items:center;gap:3px}
+.fuel-v{width:8px;height:46px;background:rgba(255,255,255,0.07);border-radius:4px;overflow:hidden;display:flex;align-items:flex-end}
+.fuel-vf{width:100%;border-radius:4px;background:#e67e22;box-shadow:0 0 6px rgba(230,126,34,0.5);transition:height .5s}
+.fuel-lbl{font-size:9px;color:var(--text-dim)}
+
+/* ─── MINIMAP - bottom right ─── */
+#minimap{
+  position:fixed;bottom:22px;right:18px;z-index:10;
+  width:150px;height:115px;
+  border:1px solid var(--red-border);
+  border-radius:10px;overflow:hidden;
+  background:#080808;
+}
+.mm-bg{position:absolute;inset:0}
+.mm-grid-svg{position:absolute;inset:0;width:100%;height:100%}
+.mm-dot{
+  position:absolute;top:50%;left:50%;
+  width:9px;height:9px;margin:-4.5px;
+  border-radius:50%;background:var(--red);
+  box-shadow:0 0 10px var(--red-glow);
+  animation:pulse 1.5s ease-in-out infinite;
+}
+.mm-ring{
+  position:absolute;top:50%;left:50%;
+  width:24px;height:24px;margin:-12px;
+  border:1px solid rgba(192,57,43,0.4);
+  border-radius:50%;
+  animation:ring 1.5s ease-out infinite;
+}
+.mm-footer{
+  position:absolute;bottom:0;left:0;right:0;
+  text-align:center;font-size:8px;letter-spacing:2px;
+  color:rgba(192,57,43,0.45);font-weight:700;
+  padding:3px 0;
+  background:rgba(0,0,0,0.5);
+}
+.north-badge{
+  position:absolute;top:5px;left:50%;transform:translateX(-50%);
+  font-size:8px;font-weight:700;letter-spacing:1px;
+  color:rgba(192,57,43,0.5);font-family:'Orbitron',sans-serif;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes ring{0%{transform:scale(.5);opacity:.6}100%{transform:scale(2.2);opacity:0}}
+
+/* ─── NOTIFICATIONS - center left ─── */
+#notifs{
+  position:fixed;left:18px;top:50%;transform:translateY(-50%);
+  z-index:100;
+  display:flex;flex-direction:column;gap:5px;
+}
+.notif{
+  background:rgba(0,0,0,0.8);
+  border-left:2px solid var(--red);
+  border-radius:0 7px 7px 0;
+  padding:7px 13px;max-width:240px;
+  animation:slideIn .3s ease, fadeOut .3s ease 4.7s forwards;
+}
+.notif.success{border-color:#27ae60}
+.notif.warning{border-color:#f39c12}
+.notif.info   {border-color:#3498db}
+.notif-t{font-size:12px;font-weight:700;color:#fff}
+.notif-m{font-size:11px;color:rgba(255,255,255,0.5);margin-top:2px}
+@keyframes slideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:none}}
+@keyframes fadeOut{from{opacity:1}to{opacity:0;margin:0;padding:0;height:0}}
+
+/* ─── STATUS BADGES ─── */
+#badges{
+  position:fixed;bottom:115px;right:18px;
+  display:flex;flex-direction:column;gap:4px;align-items:flex-end;
+  z-index:10;
+}
+.badge{
+  font-size:9px;font-weight:700;letter-spacing:1px;
+  padding:3px 10px;border-radius:20px;
+  display:flex;align-items:center;gap:5px;
+}
+.badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.b-wanted{background:rgba(192,57,43,0.2);color:var(--red);border:1px solid var(--red-border);animation:blink 1s infinite}
+.b-duty  {background:rgba(46,204,113,0.15);color:#2ecc71;border:1px solid rgba(46,204,113,0.3)}
+.b-belt  {background:rgba(241,196,15,0.15);color:#f1c40f;border:1px solid rgba(241,196,15,0.3)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ─── CORNER DECO ─── */
+.corner{position:fixed;width:18px;height:18px;z-index:5}
+.c-tl{top:6px;left:6px;border-top:1px solid rgba(192,57,43,0.35);border-left:1px solid rgba(192,57,43,0.35)}
+.c-tr{top:6px;right:6px;border-top:1px solid rgba(192,57,43,0.35);border-right:1px solid rgba(192,57,43,0.35)}
+.c-bl{bottom:6px;left:6px;border-bottom:1px solid rgba(192,57,43,0.35);border-left:1px solid rgba(192,57,43,0.35)}
+.c-br{bottom:6px;right:6px;border-bottom:1px solid rgba(192,57,43,0.35);border-right:1px solid rgba(192,57,43,0.35)}
+
+/* ─── SERVER NAME WATERMARK ─── */
+#watermark{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;
+  letter-spacing:5px;color:rgba(192,57,43,0.2);
+  pointer-events:none;z-index:1;
+  white-space:nowrap;
+  margin-bottom:90px;
+}
+</style>
+</head>
+<body>
+
+<div class="corner c-tl"></div>
+<div class="corner c-tr"></div>
+<div class="corner c-bl"></div>
+<div class="corner c-br"></div>
+
+<!-- Player Card -->
+<div id="player-card">
+  <div class="avatar" id="avatar">?</div>
+  <div>
+    <div class="pname" id="player-name">—</div>
+    <div class="pid">ID: <span id="player-id">0</span> &nbsp;|&nbsp; Ping: <span id="player-ping">0</span>ms</div>
+    <span class="job-pill" id="player-job">Thường Dân</span>
+  </div>
+</div>
+
+<!-- Info Panel -->
+<div id="info-panel">
+  <div class="chip"><span class="ic">🕐</span><span class="c-time" id="game-time">00:00</span></div>
+  <div class="chip"><span class="ic">⛅</span><span class="c-yellow" id="weather">Nắng  32°C</span></div>
+  <div class="chip"><span class="ic">💵</span><span class="c-green" id="cash">$0</span></div>
+  <div class="chip"><span class="ic">🏦</span><span class="c-blue" id="bank">$0</span></div>
+  <div class="chip"><span class="ic">📍</span><span class="c-dim" id="zone">—</span></div>
+</div>
+
+<!-- Vitals -->
+<div id="vitals">
+  <div class="bar-row">
+    <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#c0392b" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+    <div class="b-track"><div class="b-fill b-hp" id="bar-hp" style="width:100%"></div></div>
+    <span class="b-num" id="txt-hp">100</span>
+  </div>
+  <div class="bar-row">
+    <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#2980b9" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div class="b-track"><div class="b-fill b-armor" id="bar-armor" style="width:0%"></div></div>
+    <span class="b-num" id="txt-armor">0</span>
+  </div>
+  <div class="bar-row">
+    <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#e67e22" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg></div>
+    <div class="b-track"><div class="b-fill b-food" id="bar-food" style="width:100%"></div></div>
+    <span class="b-num" id="txt-food">100</span>
+  </div>
+  <div class="bar-row">
+    <div class="b-ic"><svg viewBox="0 0 24 24" fill="none" stroke="#16a085" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg></div>
+    <div class="b-track"><div class="b-fill b-water" id="bar-water" style="width:100%"></div></div>
+    <span class="b-num" id="txt-water">100</span>
+  </div>
+</div>
+
+<!-- Speedometer (hidden when on foot) -->
+<div id="speedo">
+  <div class="arc-wrap">
+    <svg viewBox="0 0 84 84">
+      <circle cx="42" cy="42" r="36" fill="none" stroke="rgba(192,57,43,0.12)" stroke-width="5"/>
+      <circle cx="42" cy="42" r="36" fill="none" stroke="#c0392b" stroke-width="5"
+        stroke-dasharray="226" stroke-dashoffset="226"
+        stroke-linecap="round" transform="rotate(-90 42 42)"
+        id="arc"/>
+    </svg>
+    <div class="arc-num">
+      <span class="arc-val" id="spd-num">0</span>
+      <span class="arc-unit">KM/H</span>
+    </div>
+  </div>
+  <div class="s-div"></div>
+  <div class="gear-col">
+    <div class="gear-lbl">GEAR</div>
+    <div class="gear-val" id="gear-num">N</div>
+    <div class="eng-badge" id="eng-badge">ON</div>
+  </div>
+  <div class="s-div"></div>
+  <div class="fuel-col">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"><rect x="3" y="2" width="12" height="20" rx="2"/><path d="M15 8h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/><line x1="7" y1="6" x2="11" y2="6"/></svg>
+    <div class="fuel-v"><div class="fuel-vf" id="fuel-bar" style="height:100%"></div></div>
+    <div class="fuel-lbl" id="fuel-txt">100%</div>
+  </div>
+</div>
+
+<!-- Minimap -->
+<div id="minimap">
+  <svg class="mm-grid-svg" viewBox="0 0 150 115" xmlns="http://www.w3.org/2000/svg">
+    <rect width="150" height="115" fill="#080808"/>
+    <line x1="75" y1="0" x2="75" y2="115" stroke="rgba(192,57,43,0.13)" stroke-width="7"/>
+    <line x1="0" y1="57" x2="150" y2="57" stroke="rgba(192,57,43,0.13)" stroke-width="7"/>
+    <line x1="25" y1="0" x2="25" y2="115" stroke="rgba(192,57,43,0.07)" stroke-width="3"/>
+    <line x1="115" y1="0" x2="115" y2="115" stroke="rgba(192,57,43,0.07)" stroke-width="3"/>
+    <line x1="0" y1="28" x2="150" y2="28" stroke="rgba(192,57,43,0.07)" stroke-width="3"/>
+    <line x1="0" y1="86" x2="150" y2="86" stroke="rgba(192,57,43,0.07)" stroke-width="3"/>
+    <rect x="32" y="34" width="24" height="15" rx="2" fill="rgba(192,57,43,0.1)"/>
+    <rect x="85" y="34" width="20" height="17" rx="2" fill="rgba(192,57,43,0.1)"/>
+    <rect x="32" y="66" width="28" height="13" rx="2" fill="rgba(192,57,43,0.1)"/>
+    <rect x="85" y="64" width="22" height="16" rx="2" fill="rgba(192,57,43,0.1)"/>
+  </svg>
+  <div class="north-badge">N</div>
+  <div class="mm-ring"></div>
+  <div class="mm-dot"></div>
+  <div class="mm-footer">VANCANHCITY</div>
+</div>
+
+<!-- Status Badges -->
+<div id="badges"></div>
+
+<!-- Notifications -->
+<div id="notifs"></div>
+
+<div id="watermark">VANCANHCITY ROLEPLAY</div>
+
+<script>
+// ── BRIDGE: nhận lệnh từ Lua qua triggerEvent ──────────────
+function vcc_setPlayer(name, id, job) {
+  document.getElementById('player-name').textContent = name || '—';
+  document.getElementById('player-id').textContent = id || 0;
+  const parts = (name||'?').trim().split(' ');
+  const init = (parts[0][0]+(parts[parts.length-1][0]||'')).toUpperCase();
+  document.getElementById('avatar').textContent = init;
+  document.getElementById('player-job').textContent = job || 'Thường Dân';
+}
+
+function vcc_setMoney(cash, bank) {
+  document.getElementById('cash').textContent = '$'+fmt(cash||0);
+  document.getElementById('bank').textContent = '$'+fmt(bank||0);
+}
+
+function vcc_setStats(hp, armor, food, water) {
+  setBar('hp', hp); setBar('armor', armor);
+  setBar('food', food); setBar('water', water);
+}
+
+function vcc_setVehicle(inVeh, speed, gear, fuel, engineOn) {
+  const s = document.getElementById('speedo');
+  if (!inVeh) { s.classList.remove('active'); return; }
+  s.classList.add('active');
+  const spd = Math.max(0, Math.min(200, speed||0));
+  document.getElementById('spd-num').textContent = Math.round(spd);
+  const arc = document.getElementById('arc');
+  const offset = 226 - (226 * spd / 200);
+  arc.style.strokeDashoffset = offset;
+  const g = gear||0;
+  document.getElementById('gear-num').textContent = g===0?'N':g===-1?'R':g;
+  const eb = document.getElementById('eng-badge');
+  if (engineOn) { eb.textContent='ON'; eb.className='eng-badge'; }
+  else          { eb.textContent='OFF'; eb.className='eng-badge off'; }
+  const f = Math.max(0, Math.min(100, fuel||0));
+  document.getElementById('fuel-bar').style.height = f+'%';
+  document.getElementById('fuel-txt').textContent = Math.round(f)+'%';
+}
+
+function vcc_setTime(h, m) {
+  document.getElementById('game-time').textContent =
+    (h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+}
+
+function vcc_setWeather(label, temp) {
+  document.getElementById('weather').textContent = label+'  '+temp+'°C';
+}
+
+function vcc_setZone(zone) {
+  document.getElementById('zone').textContent = zone||'—';
+}
+
+function vcc_setPing(ping) {
+  document.getElementById('player-ping').textContent = ping||0;
+}
+
+function vcc_notify(title, msg, style) {
+  const box = document.getElementById('notifs');
+  const el = document.createElement('div');
+  el.className = 'notif'+(style?' '+style:'');
+  el.innerHTML = '<div class="notif-t">'+title+'</div>'
+               + (msg?'<div class="notif-m">'+msg+'</div>':'');
+  box.prepend(el);
+  setTimeout(()=>{ if(el.parentNode) el.remove(); }, 5000);
+}
+
+function vcc_setStatus(wanted, onDuty, seatbelt) {
+  const b = document.getElementById('badges');
+  b.innerHTML = '';
+  if (wanted)   b.innerHTML += '<div class="badge b-wanted"><div class="badge-dot"></div>BỊ TRUY NÃ</div>';
+  if (onDuty)   b.innerHTML += '<div class="badge b-duty"><div class="badge-dot"></div>ON DUTY</div>';
+  if (seatbelt) b.innerHTML += '<div class="badge b-belt"><div class="badge-dot"></div>THẮT DÂY</div>';
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function fmt(n){ return Number(n).toLocaleString('vi-VN'); }
+function setBar(name, val){
+  const pct = Math.max(0, Math.min(100, val||0));
+  const b = document.getElementById('bar-'+name);
+  const t = document.getElementById('txt-'+name);
+  if(b) b.style.width = pct+'%';
+  if(t) t.textContent = Math.round(pct);
+}
+
+// ── EXPOSE global cho Lua gọi qua executeJS ───────────────
+window.vcc = {
+  setPlayer:  vcc_setPlayer,
+  setMoney:   vcc_setMoney,
+  setStats:   vcc_setStats,
+  setVehicle: vcc_setVehicle,
+  setTime:    vcc_setTime,
+  setWeather: vcc_setWeather,
+  setZone:    vcc_setZone,
+  setPing:    vcc_setPing,
+  notify:     vcc_notify,
+  setStatus:  vcc_setStatus,
+};
+</script>
+</body>
+</html>

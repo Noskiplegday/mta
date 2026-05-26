@@ -25,6 +25,7 @@
         <object name="resource.webadmin"></object>
         <object name="resource.acpanel"></object>
         
+        <object name="resource.login_ui" />
         <object name="resource.help_system" />
         <object name="resource.account"></object>
         <object name="resource.character"></object>

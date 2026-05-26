@@ -1,0 +1,12 @@
+<meta>
+    <info author="Chính Chủ" description="Hệ thống Login CEF Van Canh" type="script" version="1.2.0" />
+    
+    <script src="client.lua" type="client" cache="false" />
+    <script src="server.lua" type="server" />
+    
+    <aclRequest>
+        <request name="function.requestBrowserDomains" protected="true" />
+    </aclRequest>
+
+    <file src="html/index.html" />
+</meta>

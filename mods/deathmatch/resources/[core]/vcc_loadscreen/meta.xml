@@ -1,5 +1,0 @@
-<meta>
-    <info author="VanCanhCity" type="script" name="vcc_loadscreen" description="Van Canh City Loading Screen"/>
-    <script src="client.lua" type="client"/>
-    <file src="loadscreen.html"/>
-</meta>
