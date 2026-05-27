@@ -1,0 +1,273 @@
+body {
+    margin: 0;
+    padding: 0;
+    background: none;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    color: #f3f3f3;
+    user-select: none;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#shop-container {
+    width: 70vw;
+    max-width: 98vw;
+    min-width: 320px;
+    min-height: 60vh;
+    max-height: 98vh;
+    background: rgba(28, 32, 48, 0.98);
+    border-radius: 24px;
+    box-shadow: 0 12px 48px 0 rgba(30,40,90,0.18), 0 1.5px 8px 0 rgba(0,0,0,0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+#shop-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #23243a;
+    padding: 2.5vw 4vw 1.5vw 4vw;
+    border-bottom: 1.5px solid #2e314d;
+}
+
+#shop-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: #7fd7fa;
+    text-shadow: 0 2px 8px #1a1b2b44;
+}
+
+#close-btn {
+    background: none;
+    border: none;
+    color: #bfc9e0;
+    font-size: 2.2rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#close-btn:hover {
+    color: #ff4c6d;
+    background: #23243a;
+}
+
+#shop-items {
+    flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 2vw;
+    padding: 3vw;
+    overflow-y: auto;
+    max-height: 60vh;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+}
+#shop-items::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.shop-item {
+    background: linear-gradient(135deg, #23243a 60%, #2e314d 100%);
+    border-radius: 16px;
+    box-shadow: 0 2px 16px rgba(30,40,90,0.10);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2vw 1vw 1.5vw 1vw;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    border: 1.5px solid #31345a;
+}
+.shop-item:hover {
+    transform: translateY(-8px) scale(1.045);
+    box-shadow: 0 12px 32px rgba(127,215,250,0.10);
+    z-index: 2;
+    border-color: #7fd7fa;
+}
+.shop-item img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    background: #23243a;
+    box-shadow: 0 2px 8px #1a1b2b33;
+}
+.shop-item .item-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #7fd7fa;
+    text-align: center;
+    text-shadow: 0 1px 4px #1a1b2b33;
+}
+.shop-item .item-price {
+    font-size: 1rem;
+    color: #bfc9e0;
+    margin-bottom: 6px;
+}
+.shop-item .item-qty {
+    font-size: 0.95rem;
+    color: #bfc9e0;
+    margin-bottom: 10px;
+}
+.shop-item .item-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+.shop-item button {
+    background: linear-gradient(90deg, #7fd7fa 0%, #4f8cff 100%);
+    color: #23243a;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+    box-shadow: 0 1px 4px #1a1b2b22;
+}
+.shop-item button:disabled {
+    background: #31345a;
+    color: #aaa;
+    cursor: not-allowed;
+}
+.shop-item button:hover:not(:disabled) {
+    background: linear-gradient(90deg, #4f8cff 0%, #7fd7fa 100%);
+    color: #fff;
+}
+
+#shop-cart {
+    background: #23243a;
+    padding: 2vw 4vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1.5px solid #2e314d;
+}
+#cart-summary {
+    font-size: 1.1rem;
+    color: #bfc9e0;
+}
+#buy-btn {
+    background: linear-gradient(90deg, #4f8cff 0%, #7fd7fa 100%);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 32px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 2px 12px rgba(127,215,250,0.10);
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+}
+#buy-btn:disabled {
+    background: #31345a;
+    color: #aaa;
+    cursor: not-allowed;
+}
+#buy-btn:hover:not(:disabled) {
+    background: linear-gradient(90deg, #7fd7fa 0%, #4f8cff 100%);
+    color: #23243a;
+    box-shadow: 0 4px 24px #7fd7fa33;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1440px) {
+    #shop-container {
+        width: 90vw;
+        min-height: 50vh;
+    }
+    #shop-header, #shop-cart {
+        padding: 2vw 2vw;
+    }
+    #shop-items {
+        padding: 2vw;
+        gap: 1.5vw;
+    }
+}
+@media (max-width: 1024px) {
+    #shop-container {
+        width: 98vw;
+        min-height: 40vh;
+    }
+    #shop-header, #shop-cart {
+        padding: 1.5vw 1vw;
+    }
+    #shop-items {
+        padding: 1vw;
+        gap: 1vw;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    }
+    .shop-item img {
+        width: 60px;
+        height: 60px;
+    }
+}
+@media (max-width: 768px) {
+    #shop-container {
+        width: 100vw;
+        min-height: 30vh;
+        border-radius: 10px;
+    }
+    #shop-header, #shop-cart {
+        padding: 1vw 0.5vw;
+    }
+    #shop-title {
+        font-size: 1.2rem;
+    }
+    #shop-items {
+        padding: 0.5vw;
+        gap: 0.5vw;
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    }
+    .shop-item {
+        padding: 1vw 0.5vw 1vw 0.5vw;
+    }
+    .shop-item img {
+        width: 40px;
+        height: 40px;
+    }
+}
+@media (max-width: 480px) {
+    #shop-container {
+        width: 100vw;
+        min-width: 0;
+        min-height: 20vh;
+        border-radius: 0;
+    }
+    #shop-header, #shop-cart {
+        padding: 0.5vw 0.2vw;
+    }
+    #shop-title {
+        font-size: 1rem;
+    }
+    #shop-items {
+        padding: 0.2vw;
+        gap: 0.2vw;
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    }
+    .shop-item {
+        padding: 0.5vw 0.2vw 0.5vw 0.2vw;
+    }
+    .shop-item img {
+        width: 28px;
+        height: 28px;
+    }
+    #buy-btn {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+} 

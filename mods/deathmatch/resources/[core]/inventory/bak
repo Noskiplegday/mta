@@ -1,0 +1,410 @@
+local screenW, screenH = guiGetScreenSize()
+local rx = screenW/1920
+local ry = screenH/1080
+local shopItems = {}  -- Items in the shop
+local cart = {}        -- Player's cart
+local isShopOpen = false
+local scrollOffset = 0  
+local shopName = ""
+local nearShopMarker = false
+local currentShopID = nil  
+
+-- UI Layout
+local uiX, uiY, uiW, uiH = 384, 194.4, 1152, 648
+local rowHeight = 230
+local itemsPerRow = 6
+local colSpacing = 30-- Spacing between columns for better visibility
+
+--animation
+local buyButtonColor = tocolor(0, 0, 0, 255)  -- Default color: black
+
+-- Handle Pressing "E" to Open Shop
+-- Handle Pressing "E" to Open Shop
+bindKey("e", "down", function()
+    if not isShopOpen then
+        if nearShopMarker and currentShopID then
+            triggerServerEvent("requestShopItems", localPlayer, currentShopID)
+            showCursor(true)
+        end
+    else
+        isShopOpen = false
+        removeEventHandler("onClientRender", root, drawShopGUI)
+        showCursor(false)
+        
+    end
+end)
+
+-- Receive Shop Data & Open UI
+addEvent("openShopGUI", true)
+addEventHandler("openShopGUI", root, function(shopID, shop)
+    if not shop or not shop.items then return end
+    shopItems = shop.items
+    shopName = shop.name or "Shop"
+    currentShopID = shopID
+    isShopOpen = true
+    cart = {}
+    scrollOffset = 0
+
+    -- Ensure we don't add multiple render handlers
+    removeEventHandler("onClientRender", root, drawShopGUI)
+    addEventHandler("onClientRender", root, drawShopGUI)
+end)
+
+function drawShopGUI()
+    if not isShopOpen then return end
+
+    -- Draw Shop Background
+    dxDrawRectangle((uiX - 15) * rx, (uiY) * ry, (uiW + 30) * rx, uiH * ry, tocolor(0, 0, 0, 255))
+    dxDrawRectangle((uiX - 15) * rx, (uiY - 100) * ry, (uiW + 30) * rx, 135 * ry, tocolor(26, 26, 26, 255), true)  -- above bar
+    dxDrawText(shopName, uiX*rx, (uiY - 60)*ry, (uiX + uiW)*rx, uiY*ry, tocolor(94, 94, 94), 3*rx, "default-bold", "center", "top", false, false, true)
+
+    --sai inventory text
+    dxDrawRectangle((uiX + 20)*rx, (uiY - 10)*ry, 190*rx, 45*ry, tocolor(0, 0, 0, 255), true)  
+    dxDrawText("sai inventory", (uiX + 215)*rx, uiY*ry, 400*rx, uiY*ry, tocolor(110, 88, 74), 2*rx, "default-bold", "center", "top", false, false, true)
+
+    -- Items Layout
+    local startY = (uiY + (50 * ry) + scrollOffset) 
+    local colWidth = (uiW - (itemsPerRow - 1) * colSpacing) / itemsPerRow  
+    local index = 0
+
+    for itemName, data in pairs(shopItems) do
+        local col = index % itemsPerRow
+        local row = math.floor(index / itemsPerRow)
+        local itemX = uiX + col * (colWidth + colSpacing)
+        local itemY = (startY + row * rowHeight) + 20
+
+        -- Ensure only items inside UI bounds are displayed
+        if (itemY + rowHeight)*ry > (uiY + 130)*ry and (itemY + 100)*ry < (uiY + uiH)*ry then
+
+            local itemImage = items[itemName] and items[itemName].image or "[images]/shop/default.png"
+            -- Draw a rectangle behind the item
+            dxDrawRectangle(itemX*rx, itemY*ry, colWidth*rx, (rowHeight - 45)*ry, tocolor(26, 26, 26, 255))  -- Background rectangle
+
+            --DRaw image
+            if data.quantity >= 1 then
+                dxDrawRectangle((itemX + 5)*rx, (itemY + 5)*ry, (colWidth - 10)*rx, (rowHeight - 130)*ry, tocolor(90, 91, 91, 200))  -- Background rectangle
+                dxDrawImage((itemX + 45)*rx, (itemY + 10)*ry, 85*rx, 85*ry, itemImage, 0, 0, 0, tocolor(255, 255, 255, 255))
+                --Quantity
+                dxDrawRectangle((itemX - 10)*rx, (itemY + 10)*ry, 50*rx, 33*ry, tocolor(230, 150, 52, 255))
+                dxDrawText("Qty: \n" .. data.quantity, (itemX - 140)*rx, (itemY + 12)*ry, (itemX + colWidth)*rx, (itemY + 100)*ry, tocolor(0, 0, 0), 1*rx, "default-bold", "center", "top") 
+            else
+                dxDrawRectangle((itemX + 5)*rx, (itemY + 5)*ry, (colWidth - 10)*rx, (rowHeight - 130)*ry, tocolor(90, 91, 91, 200))  -- Background rectangle
+                dxDrawImage((itemX + 45)*rx, (itemY + 10)*ry, 85*rx, 85*ry, itemImage, 0, 0, 0, tocolor(15, 15, 15, 255))
+                --Quantity
+                dxDrawRectangle((itemX - 10)*rx, (itemY + 10)*ry, 50*rx, 33*ry, tocolor(204, 77, 70, 255))
+                dxDrawText("Qty: \n" .. data.quantity, (itemX - 140)*rx, (itemY + 12)*ry, (itemX + colWidth)*rx, (itemY + 100)*ry, tocolor(0, 0, 0), 1, "default-bold", "center", "top") 
+            end
+
+
+            -- Draw item details
+            dxDrawText(itemName, itemX*rx, (itemY + 108)*ry, (itemX + colWidth)*rx, itemY*ry, tocolor(181, 181, 181), 1.2*rx, "default-bold", "center", "top")  -- Item Name
+            dxDrawText("$" .. data.price, itemX*rx, (itemY + 128)*ry, (itemX + colWidth)*rx, (itemY + 115)*ry, tocolor(90, 91, 91), 1.2*rx, "default-bold", "center", "top")  -- Price
+
+
+            local cartQty = cart[itemName] or 0
+            local displayText = (cartQty == 0) and "Add To Cart" or tostring(cartQty) 
+            -- Display Item Quantity in Cart
+            if data.quantity >= 1 then
+                dxDrawRectangle((itemX + 38)*rx, (itemY + 150)*ry, 92*rx, 28*ry, tocolor(88, 184, 83, 255))
+                dxDrawText(displayText, (itemX + 76)*rx, (itemY + 155)*ry, (itemX + colWidth / 2 + 10)*rx, (itemY + 150)*ry, tocolor(0, 0, 0), 1.1*rx, "default-bold", "center", "top")
+                -- Add & Remove Buttons
+                dxDrawImage((itemX + 5)*rx, (itemY + 150)*ry, 30*rx, 30*ry, "[images]/shop/add.png")  -- Add button
+                dxDrawImage((itemX + colWidth - 36)*rx, (itemY + 150)*ry, 30*rx, 30*ry, "[images]/shop/remove.png")  -- Remove button
+            else
+                dxDrawRectangle((itemX + 38)*rx, (itemY + 150)*ry, 92*rx, 28*ry, tocolor(204, 77, 70, 255))
+                dxDrawText("Sold Out", (itemX + 76)*rx, (itemY + 155)*ry, (itemX + colWidth / 2 + 10)*rx, (itemY + 150)*ry, tocolor(0, 0, 0), 1.1*rx, "default-bold", "center", "top")
+            end
+        end
+
+        index = index + 1
+    end
+
+    dxDrawRectangle((uiX - 15)*rx, (uiY + uiH)*ry , (uiW + 30)*rx, 110*ry, tocolor(26, 26, 26, 255), true)  -- below bar
+
+    -- Buy Button
+    dxDrawImage((uiX + uiW - 250)*rx,( uiY + uiH - 60)*ry, 250*rx, 250*ry, "[images]/shop/buy.png", 0, 0, 0, buyButtonColor, true)
+end
+
+
+-- Handle Clicks
+addEventHandler("onClientClick", root, function(button, state, x, y)
+    if not isShopOpen or button ~= "left" or state ~= "down" then return end
+
+    --message(x .. ", " .. y )
+    x = x * rx
+    y = y * ry
+    -- Buy Button Click
+    if x >= 1287*rx and x <= 1535*rx and y >= 875*ry and y <= 938*ry then
+        triggerServerEvent("buyItem", localPlayer, currentShopID, cart)
+        isShopOpen = false
+        showCursor(false)
+    end
+
+    local startY = uiY + 50 + scrollOffset
+    local colWidth = (uiW - (itemsPerRow - 1) * colSpacing) / itemsPerRow  
+    local index = 0
+
+    for itemName, data in pairs(shopItems) do
+        local col = index % itemsPerRow
+        local row = math.floor(index / itemsPerRow)
+        local itemX = uiX + col * (colWidth + colSpacing)
+        local itemY = startY + row * rowHeight
+
+        -- Ensure click interactions happen only within visible UI space
+        if (itemY + rowHeight)*ry > uiY*ry and itemY*ry < (uiY + uiH)*ry then
+            -- Add Item Button Click
+            if x >= (itemX + 5)*rx and x <= (itemX + 35)*rx and y >= (itemY + 165)*ry and y <= (itemY + 195)*ry then
+                cart[itemName] = (cart[itemName] or 0) + 1
+            end
+
+            -- Remove Item Button Click
+            if x >= (itemX + colWidth - 35)*rx and x <= (itemX + colWidth - 5)*rx and y >= (itemY + 165)*ry and y <= (itemY + 195)*ry then
+                if cart[itemName] then
+                    cart[itemName] = cart[itemName] - 1
+                    if cart[itemName] <= 0 then cart[itemName] = nil end
+                end
+            end
+        end
+
+        index = index + 1
+    end
+end)
+
+
+addEventHandler("onClientKey", root, function(key, press)
+    if key ~= "e" then
+        if not isShopOpen or not press then return end
+
+        -- Get cursor position
+        local cx, cy = getCursorPosition()
+        if cx then
+            cx, cy = cx * screenW, cy * screenH
+            -- Check if cursor is inside the UI space
+            if cx >= uiX*rx and cx <= (uiX + uiW )*rx and cy >= uiY*ry and cy <= (uiY + uiH)*ry then
+                local scrollSpeed = 20  
+
+                -- Count the number of items in shopItems
+                local itemCount = 0
+                for _ in pairs(shopItems) do
+                    itemCount = itemCount + 1
+                end
+
+                -- Calculate total height of all items
+                local totalItemsHeight = math.ceil(itemCount / itemsPerRow) * rowHeight
+
+                -- Calculate maximum scroll offset (how far down we can scroll)
+                local maxScroll = math.max(0, totalItemsHeight - uiH + 100)
+
+                if key == "mouse_wheel_up" then
+                    -- Scroll up: Increase scrollOffset (but don't go above 0)
+                    scrollOffset = math.min(scrollOffset + scrollSpeed, 0)
+                elseif key == "mouse_wheel_down" then
+                    -- Scroll down: Decrease scrollOffset (but don't go beyond maxScroll)
+                    scrollOffset = math.max(scrollOffset - scrollSpeed, -maxScroll)
+                end
+
+                cancelEvent() -- Prevent other scroll-related actions
+            end
+        end
+    end
+end)
+
+-- Detect Nearby Shop Marker
+addEventHandler("onClientColShapeHit", root, function(element)
+    if element == localPlayer then
+        local shopID = getElementData(source, "shopID")
+        if shopID then
+            nearShopMarker = true
+            currentShopID = shopID
+            message("Press 'E' to access the shop.", "info")
+        end
+    end
+end)
+
+addEventHandler("onClientColShapeLeave", root, function(element)
+    if element == localPlayer then
+        nearShopMarker = false
+        currentShopID = nil
+    end
+end)
+
+
+--ANIMATION
+
+addEventHandler("onClientCursorMove", root, function(_, _, x, y)
+    -- Check if the cursor is within the specified bounds
+    if x >= 1287 * rx and x <= 1535 *ry and y >= 875 *rx and y <= 938 *ry then
+        -- Change the color to white if the cursor is inside the bounds
+        buyButtonColor = tocolor(200, 255, 200, 255)
+    else
+        -- Change the color to black if the cursor is outside the bounds
+        buyButtonColor = tocolor(255, 255, 255, 255)
+    end
+end)
+
+
+
+
+
+
+
+
+local shopData = {}
+
+addEvent("openShopManagementGUI", true)
+addEventHandler("openShopManagementGUI", root, function(shop)
+    if isElement(shopGUI) then destroyElement(shopGUI) end
+
+    shopData = shop
+    showCursor(true)
+    shopGUI = guiCreateWindow(0.35, 0.3, 0.3, 0.5, "Shop Management - [DOUBLE CLICK ON TO REFILL] ", true)
+    itemList = guiCreateGridList(0.05, 0.1, 0.9, 0.7, true, shopGUI)
+    guiGridListAddColumn(itemList, "Item", 0.5)
+    guiGridListAddColumn(itemList, "Quantity", 0.4)
+
+    for item, data in pairs(shop.items) do
+        local row = guiGridListAddRow(itemList)
+        guiGridListSetItemText(itemList, row, 1, item, false, false)
+        guiGridListSetItemText(itemList, row, 2, tostring(data.quantity), false, false)
+    end
+
+    -- Double-click event to refill item
+    addEventHandler("onClientGUIDoubleClick", itemList, function()
+        local row, col = guiGridListGetSelectedItem(itemList)
+        if row ~= -1 and col == 1 then  -- Ensure an item name is selected
+            local itemName = guiGridListGetItemText(itemList, row, 1)
+            triggerServerEvent("refillItem", resourceRoot, shop.id, itemName)
+            destroyElement(shopGUI)
+            showCursor(false)
+        end
+    end, false)
+
+    closeButton = guiCreateButton(0.3, 0.85, 0.4, 0.1, "Close", true, shopGUI)
+    addEventHandler("onClientGUIClick", closeButton, function()
+        destroyElement(shopGUI)
+        showCursor(false)
+    end, false)
+end)
+
+
+
+local shopHelpWindow = nil
+
+addEvent("openShopHelpGUI", true)
+addEventHandler("openShopHelpGUI", root, function()
+    if isElement(shopHelpWindow) then
+        return -- Prevent opening multiple windows
+    end
+
+    -- Create GUI Window
+    local screenW, screenH = guiGetScreenSize()
+    shopHelpWindow = guiCreateWindow((screenW - 400) / 2, (screenH - 300) / 2, 400, 300, "Shop Help", false)
+    
+    -- Instructions & Commands
+    local helpText = [[
+    --- Player Commands ---
+    Press 'E' near a shop to open it.
+    /shophelp - Show this help menu.
+
+    --- Owner Commands ---
+    /shopmanage - To manage and refill the shop
+
+    --- Admin Commands ---
+    /shopid - Get the shop ID of the nearest shop.
+    /shopsetowner [shopID] [ownerName] - Set the owner of a shop.
+    /shoprefill [shopID] - Refill all items in a shop.
+    ]]
+    
+    local helpLabel = guiCreateLabel(10, 30, 380, 200, helpText, false, shopHelpWindow)
+    guiLabelSetHorizontalAlign(helpLabel, "left", true)
+
+    -- Close Button
+    local closeButton = guiCreateButton(150, 250, 100, 30, "Close", false, shopHelpWindow)
+    addEventHandler("onClientGUIClick", closeButton, function()
+        if isElement(shopHelpWindow) then
+            destroyElement(shopHelpWindow)
+            showCursor(false)
+        end
+    end, false)
+
+    -- Show Cursor
+    showCursor(true)
+end)
+
+
+-- SHOP LOGS
+local shopLogGUI = {}
+
+addEvent("showShopLogsGUI", true)
+addEventHandler("showShopLogsGUI", root, function(logs)
+    if shopLogGUI.window then destroyElement(shopLogGUI.window) end
+
+    showCursor(true)
+
+    -- Create GUI
+    shopLogGUI.window = guiCreateWindow(0.3, 0.25, 0.4, 0.5, "Shop Transaction Logs", true)
+    shopLogGUI.gridlist = guiCreateGridList(0.05, 0.1, 0.9, 0.7, true, shopLogGUI.window)
+
+    -- Add columns
+    local colID = guiGridListAddColumn(shopLogGUI.gridlist, "ID", 0.08)
+    local colBuyer = guiGridListAddColumn(shopLogGUI.gridlist, "Buyer", 0.15)
+    local colItem = guiGridListAddColumn(shopLogGUI.gridlist, "Item", 0.2)
+    local colQty = guiGridListAddColumn(shopLogGUI.gridlist, "Qty", 0.08)
+    local colPrice = guiGridListAddColumn(shopLogGUI.gridlist, "Price", 0.15)
+    local colTime = guiGridListAddColumn(shopLogGUI.gridlist, "Timestamp", 0.25) -- New column for timestamp
+
+    -- Populate gridlist
+    for _, log in ipairs(logs) do
+        local row = guiGridListAddRow(shopLogGUI.gridlist)
+        guiGridListSetItemText(shopLogGUI.gridlist, row, colID, tostring(log.id), false, false)
+        guiGridListSetItemText(shopLogGUI.gridlist, row, colBuyer, log.buyer, false, false)
+        guiGridListSetItemText(shopLogGUI.gridlist, row, colItem, log.item, false, false)
+        guiGridListSetItemText(shopLogGUI.gridlist, row, colQty, tostring(log.quantity), false, false)
+        guiGridListSetItemText(shopLogGUI.gridlist, row, colPrice, "$" .. tostring(log.price), false, false)
+        guiGridListSetItemText(shopLogGUI.gridlist, row, colTime, log.timestamp, false, false) -- Show timestamp
+    end
+
+    -- Close Button
+    shopLogGUI.close = guiCreateButton(0.35, 0.85, 0.3, 0.1, "Close", true, shopLogGUI.window)
+    addEventHandler("onClientGUIClick", shopLogGUI.close, function()
+        if shopLogGUI.window then destroyElement(shopLogGUI.window) end
+        shopLogGUI = {}
+        showCursor(false)
+    end, false)
+end)
+
+
+
+-------------------------------------------------------------------------------------------------------
+--IMAGE IN BLIP
+-------------------------------------------------------------------------------------------------------
+ShopLocations = {}
+
+addEvent("receiveShopLocations", true)
+addEventHandler("receiveShopLocations", root, function(data)
+    if type(data) == "table" then
+        ShopLocations = data
+    end
+end)
+
+
+
+local garagemTxd = dxCreateTexture("[images]/shop/shop.png")
+
+tick9 = getTickCount()
+addEventHandler('onClientRender', root, 
+function()
+    local Op1, Op2 = interpolateBetween(0.4, 1.4, 0, 0.7, 1.7, 0, ((getTickCount() - tick9) / 1500), "SineCurve")
+    local x, y, z = getCameraMatrix()
+    
+    for _, marker in ipairs(ShopLocations) do
+        local markerX, markerY, markerZ = marker.x, marker.y, marker.z
+        local distance_1 = getDistanceBetweenPoints3D(x, y, z, markerX, markerY, markerZ)
+        
+        if distance_1 <= 30 then
+            dxDrawMaterialLine3D(markerX, markerY, markerZ + Op1, markerX, markerY, markerZ + Op2, garagemTxd, 1, tocolor(configPontos.corImagem[1], configPontos.corImagem[2], configPontos.corImagem[3], 255))
+        end
+    end
+end)
+
+

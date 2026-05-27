@@ -1,0 +1,37 @@
+[SHOP OWNER CHANGED]: Shop ID 1 is now owned by mia
+SHOP ID: 1 | mia bought 2 Chocolate for 20$
+SHOP ID: 1 | mia bought 3 Chocolate for 30$
+SHOP ID: 1 | mia bought 3 Radio for 30$
+SHOP ID: 1 | mia REFILLED Chocolate TO 6
+SHOP ID: 1 | mia REFILLED Radio TO 5
+SHOP ID: 1 | mia bought 2 Chocolate for 20$
+SHOP ID: 1 | mia bought 3 Radio for 30$
+SHOP ID: 1 | mia REFILLED Radio TO 5
+SHOP ID: 1 | mia bought 10 water for 50$
+SHOP ID: 1 | mia bought 5 Radio for 50$
+SHOP ID: 1 | mia bought 4 Chocolate for 40$
+SHOP ID: 1 | mia REFILLED water TO 1
+SHOP ID: 2 | GameChanger bought 1 fanta for 5$
+SHOP ID: 2 | GameChanger bought 1 water for 5$
+SHOP ID: 2 | GameChanger bought 3 Whisky for 30$
+[COMPLETE REFILL] - SHOP ID: 1 | by mia
+SHOP ID: 1 | mia bought 6 water for 30$
+SHOP ID: 1 | mia bought 6 Seed for 60$
+SHOP ID: 1 | mia bought 5 Fertilizer for 50$
+SHOP ID: 1 | mia bought 1 Pot for 10$
+SHOP ID: 1 | mia bought 1 Nokia for 10$
+SHOP ID: 2 | mia bought 1 salad for 10$
+SHOP ID: 2 | mia bought 1 Chocolate for 10$
+SHOP ID: 2 | mia bought 1 fanta for 5$
+SHOP ID: 2 | mia bought 1 Pizza for 10$
+SHOP ID: 2 | mia bought 1 burger for 10$
+SHOP ID: 2 | mia bought 1 lays for 10$
+SHOP ID: 2 | mia bought 1 Tequila for 10$
+SHOP ID: 2 | mia bought 1 oldMonk for 10$
+SHOP ID: 2 | mia bought 1 LemonSoda for 10$
+SHOP ID: 2 | mia bought 1 water for 5$
+SHOP ID: 2 | mia bought 1 Vodka for 10$
+SHOP ID: 2 | mia bought 1 wine for 10$
+SHOP ID: 2 | mia bought 1 Whisky for 10$
+SHOP ID: 2 | mia bought 1 coffee for 10$
+SHOP ID: 2 | mia bought 1 beer for 10$

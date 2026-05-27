@@ -53,7 +53,10 @@ addEventHandler("onAuthSuccessClearUI", root, function()
         loginBrowser = nil
     end
     showCursor(false)
-    guiSetInputMode("allow_binds")
+    
+    -- DÒNG FIX PHÍM XE:
+    guiSetInputMode("allow_binds") 
+    
     setPlayerHudComponentVisible("all", true)
     setElementFrozen(localPlayer, false)
     toggleAllControls(true)

@@ -251,9 +251,10 @@ function toggleVehicleLock(player)
     end
 end
 addCommandHandler("lockvehicle", toggleVehicleLock)
+addCommandHandler("lock", toggleVehicleLock) -- Đồng bộ thêm lệnh ngắn /lock cho người chơi tiện gõ
 
 -- 5. LỆNH ĐIỀU KHIỂN ĐỘNG CƠ XE (Phím M)
-addCommandHandler("engine", function(player, cmd)
+function toggleVehicleEngine(player)
     local veh = getPedOccupiedVehicle(player)
     if not veh then 
         outputChatBox("#FF0000[Lỗi] Bạn phải ngồi trên xe mới có thể bật/tắt động cơ!", player, 255, 255, 255, true)
@@ -281,10 +282,11 @@ addCommandHandler("engine", function(player, cmd)
     else
         outputChatBox("#00FF00* Động cơ phương tiện đã được khởi động. *", player, 255, 255, 255, true)
     end
-end)
+end
+addCommandHandler("engine", toggleVehicleEngine)
 
 -- 6. LỆNH THẮT DÂY AN TOÀN (Phím G)
-addCommandHandler("seatbelt", function(player, cmd)
+function toggleVehicleSeatbelt(player)
     local veh = getPedOccupiedVehicle(player)
     if not veh then 
         outputChatBox("#FF0000[Lỗi] Bạn phải ngồi trong xe mới sử dụng được dây an toàn!", player, 255, 255, 255, true)
@@ -298,40 +300,43 @@ addCommandHandler("seatbelt", function(player, cmd)
     else
         outputChatBox("#00FF00* Bạn đã thắt dây an toàn chặt chẽ. *", player, 255, 255, 255, true)
     end
-end)
+end
+addCommandHandler("seatbelt", toggleVehicleSeatbelt)
 
--- 7. LỆNH MỞ/ĐÓNG NẮP CAPO (/hood)
-addCommandHandler("hood", function(player, cmd)
+-- 7. LỆNH MỞ/ĐÓNG NẮP CAPO (/hood) - ĐÃ ĐỔI SANG HÀM CHUẨN CỦA MTA
+function toggleVehicleHood(player)
     local veh = getPedOccupiedVehicle(player)
     if not veh or getVehicleController(veh) ~= player then return end
 
-    local currentRatio = getVehicleOpenRatio(veh, 0)
+    local currentRatio = getVehicleDoorOpenRatio(veh, 0)
     if currentRatio == 0 then
-        setVehicleOpenRatio(veh, 0, 1, 500)
+        setVehicleDoorOpenRatio(veh, 0, 1, 500)
         outputChatBox("#00FF00* Bạn đã mở nắp capo xe. *", player, 255, 255, 255, true)
     else
-        setVehicleOpenRatio(veh, 0, 0, 500)
+        setVehicleDoorOpenRatio(veh, 0, 0, 500)
         outputChatBox("#FF9900* Bạn đã đóng nắp capo xe. *", player, 255, 255, 255, true)
     end
-end)
+end
+addCommandHandler("hood", toggleVehicleHood)
 
--- 8. LỆNH MỞ/ĐÓNG CỐP XE (/trunk)
-addCommandHandler("trunk", function(player, cmd)
+-- 8. LỆNH MỞ/ĐÓNG CỐP XE (/trunk) - ĐÃ ĐỔI SANG HÀM CHUẨN CỦA MTA
+function toggleVehicleTrunk(player)
     local veh = getPedOccupiedVehicle(player)
     if not veh or getVehicleController(veh) ~= player then return end
 
-    local currentRatio = getVehicleOpenRatio(veh, 1)
+    local currentRatio = getVehicleDoorOpenRatio(veh, 1)
     if currentRatio == 0 then
-        setVehicleOpenRatio(veh, 1, 1, 500)
+        setVehicleDoorOpenRatio(veh, 1, 1, 500)
         outputChatBox("#00FF00* Bạn đã mở cốp xe. *", player, 255, 255, 255, true)
     else
-        setVehicleOpenRatio(veh, 1, 0, 500)
+        setVehicleDoorOpenRatio(veh, 1, 0, 500)
         outputChatBox("#FF9900* Bạn đã đóng cốp xe. *", player, 255, 255, 255, true)
     end
-end)
+end
+addCommandHandler("trunk", toggleVehicleTrunk)
 
 -- 9. LỆNH BẬT/TẮT ĐÈN XE THỦ CÔNG (/lights)
-addCommandHandler("lights", function(player, cmd)
+function toggleVehicleLights(player)
     local veh = getPedOccupiedVehicle(player)
     if not veh or getVehicleController(veh) ~= player then return end
 
@@ -343,15 +348,24 @@ addCommandHandler("lights", function(player, cmd)
         setVehicleOverrideLights(veh, 2)
         outputChatBox("#00FF00* Bạn đã bật đèn xe. *", player, 255, 255, 255, true)
     end
-end)
+end
+addCommandHandler("lights", toggleVehicleLights)
 
--- ─── BỘ NHẬN TÍN HIỆU PHÍM TẮT TỪ CLIENT GỬI LÊN ──────────────────
+-- ─── BỘ NHẬN TÍN HIỆU PHÍM TẮT TỪ CLIENT GỬI LÊN (GỌI TRỰC TIẾP KHÔNG QUA TRUNG GIAN) ───
 addEvent("vcc_vehicle:triggerCommand", true)
 addEventHandler("vcc_vehicle:triggerCommand", root, function(cmdName)
     if cmdName == "lock" then
         toggleVehicleLock(source)
-    else
-        executeCommandHandler(cmdName, source)
+    elseif cmdName == "engine" then
+        toggleVehicleEngine(source)
+    elseif cmdName == "seatbelt" then
+        toggleVehicleSeatbelt(source)
+    elseif cmdName == "hood" then
+        toggleVehicleHood(source)
+    elseif cmdName == "trunk" then
+        toggleVehicleTrunk(source)
+    elseif cmdName == "lights" then
+        toggleVehicleLights(source)
     end
 end)
 

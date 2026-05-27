@@ -25,6 +25,8 @@
         <object name="resource.webadmin"></object>
         <object name="resource.acpanel"></object>
         
+        <object name="resource.inventory" />
+        <object name="resource.vehicle_system" />
         <object name="resource.login_ui" />
         <object name="resource.help_system" />
         <object name="resource.account"></object>
@@ -115,6 +117,7 @@
         <right name="function.removeBan" access="false"></right>
         <right name="function.removeAccount" access="false"></right>
         <right name="function.setAccountName" access="false"></right>
+        <right name="function.executeCommandHandler" access="true" />
         <right name="function.setAccountPassword" access="false"></right>
         <right name="function.setAccountSerial" access="false"></right>
         <right name="function.kickPlayer" access="false"></right>

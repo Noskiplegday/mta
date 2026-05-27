@@ -1,22 +1,22 @@
--- vcc_help/help_client.lua
+-- help_system/client.lua
 local screenW, screenH = guiGetScreenSize()
 local scale = screenH / 768 -- Responsive scale
 
 local isHelpOpen = false
-local currentTab = "xe" -- Tab mặc định khi mở lên
+local currentTab = "xe" -- Tab mặc định khi mở bảng
 
--- Danh sách lệnh chia theo các chuyên mục
+-- Danh sách lệnh chia theo các chuyên mục hiển thị trên giao diện
 local helpCommands = {
     xe = {
         title = "HỆ THỐNG LỆNH XE CỘ",
         commands = {
             { cmd = "/engine hoặc nút M", desc = "Bật / Tắt động cơ phương tiện" },
+            { cmd = "/buyvehicle", desc = "Mua xe mới" },
             { cmd = "/lock hoặc nút K", desc = "Khóa / Mở khóa cửa xe cá nhân" },
             { cmd = "/seatbelt hoặc nút G", desc = "Thắt / Tháo dây an toàn khi ngồi trên xe" },
-            { cmd = "/hood", desc = "Mở / Đóng nắp capo xe" },
-            { cmd = "/trunk", desc = "Mở / Đóng cốp xe (Cất/lấy đồ đạc)" },
-            { cmd = "/lights", desc = "Bật / Tắt đèn pha thủ công" },
-            { cmd = "/eject [ID/Tên]", desc = "Đuổi hành khách ra khỏi xe của bạn" },
+            { cmd = "/hood hoặc Shift + ,", desc = "Mở / Đóng nắp capo xe" },
+            { cmd = "/trunk hoặc Shift + .", desc = "Mở / Đóng cốp xe (Cất/lấy đồ đạc)" },
+            { cmd = "/lights hoặc Shift + L", desc = "Bật / Tắt đèn pha thủ công" },
         }
     },
     ban_than = {
@@ -32,7 +32,7 @@ local helpCommands = {
     }
 }
 
--- Hàm vẽ bo góc đơn giản
+-- Hàm vẽ khung nền
 local function drawRoundRect(x, y, w, h, col)
     dxDrawRectangle(x, y, w, h, col)
 end
@@ -40,24 +40,24 @@ end
 addEventHandler("onClientRender", root, function()
     if not isHelpOpen then return end
 
-    -- Cấu hình kích thước bảng Help
+    -- Kích thước bảng Help (Chuẩn kích thước gọn gàng)
     local w, h = 550 * scale, 400 * scale
     local x, y = (screenW - w) / 2, (screenH - h) / 2
 
-    -- Khung nền chính (Đen mờ biên Neon Đỏ)
+    -- Khung nền chính (Đen mờ biên Neon Đỏ theo phong cách VanCanhCity)
     drawRoundRect(x, y, w, h, tocolor(10, 10, 10, 230))
-    dxDrawRectangle(x, y, w, 2 * scale, tocolor(231, 76, 60, 255)) -- Viền trên Neon Đỏ
-    dxDrawRectangle(x, y + h - 2*scale, w, 2 * scale, tocolor(231, 76, 60, 100))
+    dxDrawRectangle(x, y, w, 2 * scale, tocolor(231, 76, 60, 255)) -- Viền Neon Đỏ phía trên
+    dxDrawRectangle(x, y + h - 2 * scale, w, 2 * scale, tocolor(231, 76, 60, 100))
 
-    -- Tiêu đề bảng
+    -- Tiêu đề chính
     dxDrawText("VAN CANH CITY — BẢNG TRỢ GIÚP", x, y + 15 * scale, x + w, y + 40 * scale, 
         tocolor(255, 255, 255, 255), scale * 1.2, "default-bold", "center", "top")
     
-    -- Gợi ý đóng bảng
-    dxDrawText("Bấm [ F1 ] để ĐÓNG bảng", x, y + h - 25 * scale, x + w, y + h, 
+    -- Gợi ý nút tắt
+    dxDrawText("Bấm [ F1 ] để ĐÓNG bảng trợ giúp", x, y + h - 25 * scale, x + w, y + h, 
         tocolor(150, 150, 150, 255), scale * 0.75, "default-bold", "center", "top")
 
-    -- ─── VẼ TAB CHỌN ───
+    -- ─── ĐỔI TAB BẰNG CHUỘT ───
     local tabW = 140 * scale
     local tabH = 30 * scale
     
@@ -73,34 +73,32 @@ addEventHandler("onClientRender", root, function()
     dxDrawText("👤 Lệnh Cá Nhân", x + 170 * scale, y + 55 * scale, x + 170 * scale + tabW, y + 55 * scale + tabH,
         tocolor(255, 255, 255, 255), scale * 0.85, "default-bold", "center", "center")
 
-    -- ─── HIỂN THỊ NỘI DUNG LỆNH THEO TAB ───
+    -- ─── HIỂN THỊ NỘI DUNG CHI TIẾT THEO TAB ───
     local activeData = helpCommands[currentTab]
     if activeData then
-        -- Tiêu đề của phân mục
         dxDrawText(activeData.title, x + 25 * scale, y + 105 * scale, x + w, y + 130 * scale,
             tocolor(231, 76, 60, 255), scale * 0.9, "default-bold", "left")
 
-        -- Vòng lặp in danh sách lệnh ngoài màn hình
         local startY = y + 130 * scale
         for i, item in ipairs(activeData.commands) do
             local itemY = startY + (i - 1) * 32 * scale
             
-            -- Nền dòng (xen kẽ màu đen/xám mờ cho dễ nhìn)
+            -- Màu nền xen kẽ giữa các dòng cho dễ nhìn
             local rowBg = (i % 2 == 0) and tocolor(20, 20, 20, 150) or tocolor(30, 30, 30, 150)
             dxDrawRectangle(x + 20 * scale, itemY, w - 40 * scale, 26 * scale, rowBg)
 
-            -- Cột Lệnh (Màu xanh sáng / Trắng)
-            dxDrawText(item.cmd, x + 30 * scale, itemY, x + 200 * scale, itemY + 26 * scale,
+            -- Cột lệnh (Màu xanh lá cây sáng)
+            dxDrawText(item.cmd, x + 30 * scale, itemY, x + 220 * scale, itemY + 26 * scale,
                 tocolor(231, 76, 60, 255), scale * 0.8, "default-bold", "left", "center")
             
-            -- Cột Mô tả tính năng
-            dxDrawText("➔ " .. item.desc, x + 210 * scale, itemY, x + w - 30 * scale, itemY + 26 * scale,
+            -- Cột mô tả
+            dxDrawText("➔ " .. item.desc, x + 230 * scale, itemY, x + w - 30 * scale, itemY + 26 * scale,
                 tocolor(220, 220, 220, 255), scale * 0.8, "default", "left", "center")
         end
     end
 end)
 
--- Xử lý click chuột để chuyển đổi qua lại giữa các Tab
+-- Xử lý click đổi Tab
 addEventHandler("onClientClick", root, function(button, state, absoluteX, absoluteY)
     if not isHelpOpen or state ~= "down" or button ~= "left" then return end
 
@@ -108,14 +106,14 @@ addEventHandler("onClientClick", root, function(button, state, absoluteX, absolu
     local x, y = (screenW - w) / 2, (screenH - h) / 2
     local tabW, tabH = 140 * scale, 30 * scale
 
-    -- Check click Tab Xe
+    -- Click Tab Xe
     if absoluteX >= x + 20 * scale and absoluteX <= x + 20 * scale + tabW and
        absoluteY >= y + 55 * scale and absoluteY <= y + 55 * scale + tabH then
         currentTab = "xe"
         playSoundFrontEnd(41)
     end
 
-    -- Check click Tab Cá Nhân
+    -- Click Tab Cá Nhân
     if absoluteX >= x + 170 * scale and absoluteX <= x + 170 * scale + tabW and
        absoluteY >= y + 55 * scale and absoluteY <= y + 55 * scale + tabH then
         currentTab = "ban_than"
@@ -123,9 +121,55 @@ addEventHandler("onClientClick", root, function(button, state, absoluteX, absolu
     end
 end)
 
--- Bấm F1 để bật tắt menu Trợ giúp
+-- Bấm F1 mở/tắt bảng Help
 bindKey("F1", "down", function()
     isHelpOpen = not isHelpOpen
-    showCursor(isHelpOpen) -- Hiện chuột khi mở bảng để người chơi click đổi tab
+    showCursor(isHelpOpen)
+    guiSetInputMode(isHelpOpen and "no_binds" or "allow_binds")
     playSoundFrontEnd(isHelpOpen and 11 or 12)
+end)
+
+-- ─── KHU VỰC ĐỒNG BỘ PHÍM TẮT CHO XE (SỬA ĐỔI ĐỒNG BỘ CHUẨN 100%) ────────────────────
+local function sendVehicleCmd(cmdName)
+    triggerServerEvent("vcc_vehicle:triggerCommand", localPlayer, cmdName)
+end
+
+-- Các phím đơn (Chỉ kích hoạt khi không mở khung chat để tránh lỗi gõ chữ)
+bindKey("m", "down", function()
+    if getPedOccupiedVehicle(localPlayer) and not isChatBoxInputActive() then
+        sendVehicleCmd("engine")
+    end
+end)
+
+bindKey("k", "down", function()
+    if not isChatBoxInputActive() then
+        sendVehicleCmd("lock")
+    end
+end)
+
+bindKey("g", "down", function()
+    if getPedOccupiedVehicle(localPlayer) and not isChatBoxInputActive() then
+        sendVehicleCmd("seatbelt")
+    end
+end)
+
+-- Phím Shift + , (Dấu phẩy) để mở Hood (Nắp capo)
+bindKey(",", "down", function()
+    if (getKeyState("lshift") or getKeyState("rshift")) and getPedOccupiedVehicle(localPlayer) and not isChatBoxInputActive() then
+        sendVehicleCmd("hood")
+    end
+end)
+
+-- Phím Shift + . (Dấu chấm) để mở Trunk (Cốp xe)
+bindKey(".", "down", function()
+    if (getKeyState("lshift") or getKeyState("rshift")) and getPedOccupiedVehicle(localPlayer) and not isChatBoxInputActive() then
+        sendVehicleCmd("trunk")
+    end
+end)
+
+-- Phím Shift + L để bật/tắt Đèn xe (Tránh trùng chữ l khi gõ văn bản chat thông thường)
+bindKey("l", "down", function()
+    if (getKeyState("lshift") or getKeyState("rshift")) and getPedOccupiedVehicle(localPlayer) and not isChatBoxInputActive() then
+        sendVehicleCmd("lights")
+    end
 end)

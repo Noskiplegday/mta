@@ -1,9 +1,192 @@
+
 <meta>
-    <info author="VanCanhCity" type="script" description="Advanced Grid Inventory System" version="1.0.0" />
+    <info author="SaiRamKishan" type="script" version="0.1.0"/>
+    <min_mta_version server="1.5.9" />
+
+    <!--SCRIPTS --> 
+    <script src="inventory_s.lua" type="server" />
+    <script src="inventory_c.lua" type="client" />
+    <script src="config.lua" type="shared" />
+    <script src="function_s.lua" type="server" />
+    <script src="function_c.lua" type="client" />
+
+    <!--NOTIFICATION --> 
+    <script src="util/utilC.lua" type="client" cache="false" />
+    <script src="util/utilS.lua" type="server" />
+
+    <!--SHOP SYSTEM SCRIPTS --> 
+    <script src="shopSystem/shop_s.lua" type="server" />
+    <script src="shopSystem/shop_c.lua" type="client" />
+
+    <script src="test.lua" type="server" />
+
+    <!-- Exported Functions -->
+    <export function="giveItem" type="server"/>
+    <export function="takeItem" type="server"/>
+    <export function="getItem" type="server"/>
+    <export function="clearInventory" type="server"/>
+    <export function="inventorySee" type="server"/>
+
+    <!--IMAGES --> 
+    <!--shop --> 
+    <file src="shopSystem/html/images/shop/shop.png" />
+    <file src="shopSystem/html/images/shop/buy.png" />
+    <file src="shopSystem/html/images/shop/add.png" />
+    <file src="shopSystem/html/images/shop/remove.png" />
+    <file src="shopSystem/html/images/shop/default.png" />
+	
+    <!-- food -->
+    <file src="shopSystem/html/images/foods/absinto.png" cache="false" />
+    <file src="shopSystem/html/images/foods/agua.png" cache="false" />
+    <file src="shopSystem/html/images/foods/cafe.png" cache="false" />
+    <file src="shopSystem/html/images/foods/cerveja.png" cache="false" />
+    <file src="shopSystem/html/images/foods/chocolate.png" cache="false" />
+    <file src="shopSystem/html/images/foods/conhaque.png" cache="false" />
+    <file src="shopSystem/html/images/foods/energetico.png" cache="false" />
+    <file src="shopSystem/html/images/foods/pizza.png" cache="false" />
+    <file src="shopSystem/html/images/foods/salgadinho.png" cache="false" />
+    <file src="shopSystem/html/images/foods/tequila.png" cache="false" />
+    <file src="shopSystem/html/images/foods/vodka.png" cache="false" />
+    <file src="shopSystem/html/images/foods/whisky.png" cache="false" />
+    <file src="shopSystem/html/images/foods/limonada.png" cache="false" />
+    <file src="shopSystem/html/images/foods/lanche.png" cache="false" />
+    <file src="shopSystem/html/images/foods/salada.png" cache="false" />
+
+    <file src="shopSystem/html/images/foods/biriyani.png" cache="false" />
+    <file src="shopSystem/html/images/foods/chickenCurry.png" cache="false" />
+    <file src="shopSystem/html/images/foods/fishCurry.png" cache="false" />
+    <file src="shopSystem/html/images/foods/friedRice.png" cache="false" />
+    <file src="shopSystem/html/images/foods/prawn.png" cache="false" />
+    <file src="shopSystem/html/images/foods/rice.png" cache="false" />
+    <file src="shopSystem/html/images/foods/sambar.png" cache="false" />
+    <file src="shopSystem/html/images/foods/tea.png" cache="false" />
+    <file src="shopSystem/html/images/foods/vada.png" cache="false" />
+
+    <!-- MealWeapon -->
+    <file src="shopSystem/html/images/MealWeapon/Cane.png" cache="false" />
+    <file src="shopSystem/html/images/MealWeapon/ChainSaw.png" cache="false" />
+    <file src="shopSystem/html/images/MealWeapon/Glof_Club.png" cache="false" />
+    <file src="shopSystem/html/images/MealWeapon/GolfBat.png" cache="false" />
+    <file src="shopSystem/html/images/MealWeapon/HandMeal.png" cache="false" />
+    <file src="shopSystem/html/images/MealWeapon/Katana.png" cache="false" />
+    <file src="shopSystem/html/images/MealWeapon/Knife.png" cache="false" />
+    <file src="shopSystem/html/images/MealWeapon/Molotov.png" cache="false" />
+    <file src="shopSystem/html/images/MealWeapon/Parasuite.png" cache="false" />
+    <file src="shopSystem/html/images/MealWeapon/Pool_Cue.png" cache="false" />
+    <!-- Utilitários -->
+    <file src="shopSystem/html/images/utilities/bandagem.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/colete.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/furadeira.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/gasolina.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/medkit.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/militec.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/mira.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/mochila.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/pendrive.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/repairkit.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/serra.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/pa.png" cache="false" />
+    <file src="shopSystem/html/images/utilities/bulletproofhelmet.png" cache="false" />
+    <!-- Negro -->
+    <file src="shopSystem/html/images/black/algemas.png" cache="false" />
+    <file src="shopSystem/html/images/black/c4.png" cache="false" />
+    <file src="shopSystem/html/images/black/capuz.png" cache="false" />
+    <file src="shopSystem/html/images/black/keysinvasao.png" cache="false" />
+    <file src="shopSystem/html/images/black/logsinvasao.png" cache="false" />
+    <!-- drug -->
+    <file src="shopSystem/html/images/drugs/fertilizante.png" cache="false" />
+    <file src="shopSystem/html/images/drugs/smaconha.png" cache="false" />
+    <file src="shopSystem/html/images/drugs/cocaina.png" cache="false" />
+    <file src="shopSystem/html/images/drugs/fmaconha.png" cache="false" />
+    <file src="shopSystem/html/images/drugs/pot.png" cache="false" />
+    <file src="shopSystem/html/images/others/Joint.png" cache="false" />
+    <file src="shopSystem/html/images/drugs/nokia.png" cache="false" />
+
+    <!-- weapons -->
+    <file src="shopSystem/html/images/weapons/WEAPON_GLOCK.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/WEAPON_38.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/WEAPON_MP5.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/WEAPON_AK47.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/WEAPON_AR15.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/WEAPON_DOZE.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/WEAPON_AR10.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/WEAPON_TASER.png" cache="false" />
+    <!-- bullets -->
+    <file src="shopSystem/html/images/weapons/municao9mm.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/municao556.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/municao762.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/municaosnip.png" cache="false" />
+    <file src="shopSystem/html/images/weapons/cartucho12.png" cache="false" />
+    <!-- Armas Frabrica -->
+    <file src="shopSystem/html/images/others/gatilho.png" cache="false" />
+    <file src="shopSystem/html/images/others/capsulas.png" cache="false" />
+    <file src="shopSystem/html/images/others/polvora.png" cache="false" />
+    <file src="shopSystem/html/images/others/placa-metal.png" cache="false" />
+    <file src="shopSystem/html/images/others/molas.png" cache="false" />
+    <file src="shopSystem/html/images/others/corpo-ak47.png" cache="false" />
+    <file src="shopSystem/html/images/others/corpo-glock.png" cache="false" />
+    <file src="shopSystem/html/images/others/corpo-magnum44.png" cache="false" />
+    <file src="shopSystem/html/images/others/Joia.png" cache="false" />
+    <file src="shopSystem/html/images/others/corpo-m4.png" cache="false" />
+    <file src="shopSystem/html/images/others/corpo-mp5.png" cache="false" />
+    <file src="shopSystem/html/images/others/porte-armas.png" cache="false" />
+    <file src="shopSystem/html/images/others/barra.png" cache="false" />
+    <file src="shopSystem/html/images/others/barra2.png" cache="false" />
+    <file src="shopSystem/html/images/others/m-ak47.png" cache="false" />
+    <file src="shopSystem/html/images/others/m-glock.png" cache="false" />
+    <file src="shopSystem/html/images/others/m-magnum44.png" cache="false" />
+    <file src="shopSystem/html/images/others/m-uzi.png" cache="false" />
     
-    <script src="server.lua" type="server" />
-    <script src="client.lua" type="client" />
+   <file src="shopSystem/html/images/others/buttonbg.png" cache="false" />
+    <file src="shopSystem/html/images/others/dinheirosujo.png" cache="false" />
+    <file src="shopSystem/html/images/others/seta.png" cache="false" />
+    <file src="shopSystem/html/images/others/eff_drogas.png" cache="false" />
+    <file src="shopSystem/html/images/others/eff_drogas2.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/garrafa.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/garrafaleite.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/papelao.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/vidro.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/latinha.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/ouro.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/prata.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/ferro.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/BlueStoneOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/CopperOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/DiamondOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/EmeraldOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/GoldOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/IronOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/RubyOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/SilverOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/GoldBar.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/SilverBar.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/CopperBar.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/AluminiumBar.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/AluminiumOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/MetalBar.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/MetalOre.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/Sulfer.png" cache="false" />
+    <file src="shopSystem/html/images/jobs/Coal.png" cache="false" />
+    <file src="shopSystem/html/images/others/capacete.png" cache="false" />
+    <file src="shopSystem/html/images/others/radio.png" cache="false" />
+    <file src="shopSystem/html/images/others/Bolt.png" cache="false" />
+    <file src="shopSystem/html/images/others/Glue.png" cache="false" />
+    <file src="shopSystem/html/images/others/Screw.png" cache="false" />
+    <file src="shopSystem/html/images/others/ScrewDriver.png" cache="false" />
+    <file src="shopSystem/html/images/others/Tap.png" cache="false" />
+    <file src="shopSystem/html/images/others/calfsyrup.png" cache="false" />
+    <file src="shopSystem/html/images/others/Phone.png" cache="false" />
+    <file src="shopSystem/html/images/others/GoldChain.png" cache="false" />
+    <file src="shopSystem/html/images/others/Drone.png" cache="false" />
+    <file src="shopSystem/html/images/others/OCBPaper.png" cache="false" />
+    <file src="shopSystem/html/images/others/NightStick.png" cache="false" />
+    <file src="shopSystem/html/images/others/LockPick.png" cache="false" />
+    <file src="shopSystem/html/images/others/Cigret.png" cache="false" />
+    <file src="shopSystem/html/images/others/Lighter.png" cache="false" />
+
+    <!--SHOP SYSTEM MODERN UI FILES -->
+    <file src="shopSystem/html/shop.html" cache="false" />
+    <file src="shopSystem/html/shop.css" cache="false" />
+    <file src="shopSystem/html/shop.js" cache="false" />
     
-    <export function="givePlayerItem" type="server" />
-    <export function="takePlayerItem" type="server" />
 </meta>

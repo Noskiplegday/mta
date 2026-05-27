@@ -75,88 +75,147 @@ mods/deathmatch/
 
 ### 📂 [core]/ - Hệ Thống Cốt Lõi
 
-| Module | Mục Đích |
-|--------|----------|
-| **account/** | Hệ thống tài khoản, đăng nhập, đăng ký |
-| **character/** | Quản lý nhân vật (tạo, load, save) |
-| **chat/** | Hệ thống chat (world, local, roleplay) |
-| **help_system/** | Hệ thống trợ giúp cho người chơi |
-| **inventory/** | Hệ thống kho đồ, items |
-| **login_ui/** | Giao diện đăng nhập |
-| **mysql/** | ⚠️ **CRITICAL** - Kết nối Database MySQL |
-| **peds/** | Quản lý NPC (Pedestrians) |
-| **traffic/** | Hệ thống giao thông, traffic |
-| **vehicle/** | Hệ thống phương tiện cơ bản |
-| **vehicle_system/** | Quản lý chi tiết xe (damage, fuel, etc.) |
+| Module | Mô tả hiện tại | Trạng thái |
+|--------|---------------|-----------|
+| **mysql/** | Kết nối MySQL chính, dbConnect tới `mta_rp` | Đang hoạt động |
+| **account/** | Tự động tạo tài khoản theo Serial máy, đăng nhập trực tiếp, bảng `accounts` | Đã có |
+| **character/** | Load/save nhân vật, spawn player, lưu vị trí và tiền khi quit | Đã có |
+| **login_ui/** | Giao diện CEF login/register HTML; schema `my_accounts`, `my_characters` | Có nhưng trùng lặp |
+| **chat/** | Local chat 20m, /me, /do, lệnh /gotopos | Đã có |
+| **vehicle/** | Tải xe từ DB, createvehicle, lock, engine, seatbelt, hood, trunk, lights | Đã có |
+| **vehicle_system/** | Hệ thống xe nâng cao: spawnveh/despawnveh, buyvehicle, park, refuel, fuel drain | Đã có |
+| **traffic/** | Bật traffic light tự động | Đơn giản |
+| **peds/** | Script ped server/client | Chờ mở rộng |
+| **help_system/** | Client help script | Cơ bản |
+| **inventory/** | Chưa kiểm tra rõ các lệnh/asset | Chưa rõ hiện trạng |
 
-**Ưu tiên phát triển:** MySQL → Account → Character → Inventory
-
----
-
-### 🎮 [gameplay]/ - Gameplay Features
-
-Chứa 40+ module .zip chính:
-
-**Nhóm Cơ Bản:**
-- `dialogs.zip` - UI dialogs
-- `glue.zip` - Core glue code
-- `easytext.zip` - Text utilities
-
-**Nhóm Vũ Khí & Chiến Đấu:**
-- `deathpickups.zip` - Loot sau khi chết
-- `deathmessages.zip` - Thông báo khi chết
-- `headshot.zip` - Hệ thống headshot
-- `killmessages.zip` - Thông báo kill
-
-**Nhóm Bản Đồ:**
-- `mapfixes.zip` - Fix bug bản đồ
-- `maplimits.zip` - Ranh giới bản đồ
-- `mapratings.zip` - Xếp hạng bản đồ
-- `interiors.zip` - Interior locations
-- `mapmanager.zip` - Quản lý map
-
-**Nhóm Xe & Giao Thông:**
-- `realdriveby.zip` - Drive-by shooting
-- `trainhorn.zip` - Âm thanh tàu
-- `sirenEdit.zip` - Chỉnh sửa siren
-
-**Nhóm Tiện Ích:**
-- `gps.zip` - Bản đồ GPS
-- `speedometer.zip` - Máy đo tốc độ
-- `parachute.zip` - Dù nhảy dù
-- `superman.zip` - Flying mode
-- `freecam.zip` - Tự do camera
-- `webbrowser.zip` - Trình duyệt web
-
-**Nhóm Âm Thanh & Broadcast:**
-- `voice.zip` - Chat thoại
-- `voice_local.zip` - Voice local
-- `internetradio.zip` - Radio internet
-- `joinquit.zip` - Notify join/quit
-- `missiontimer.zip` - Mission timer
-
-**Nhóm Khác:**
-- `scoreboard.zip` - Bảng điểm
-- `scores.zip` - Score tracking
-- `pickuphandler.zip` - Xử lý pickups
-- `sfxbrowser.zip` - Sound browser
-- `visualiser.zip` - Audio visualizer
+**Lưu ý quan trọng:**
+- Hiện tại có hai luồng đăng nhập/tài khoản song song: `account/` và `login_ui/`.
+- `account/` dùng `accounts`/`characters` và login tự động qua Serial.
+- `login_ui/` dùng UI CEF, bảng `my_accounts`/`my_characters`, đăng ký và đăng nhập bằng username/password.
+- Cần quyết định chọn 1 luồng auth duy nhất hoặc hợp nhất dữ liệu ngay lập tức.
 
 ---
 
-### 🛠️ [managers]/ - Quản Lý Server
+## ℹ️ Current Implementation - Thực tế vừa cập nhật
 
-Các manager module (7 modules .zip):
+### 🔧 Auth / Account / Character
+- `resources\[core]\mysql\connection.lua` kết nối MySQL mặc định `127.0.0.1`, database `mta_rp`.
+- `resources\[core]\account\server.lua`:
+  - Tạo bảng `accounts` nếu chưa có.
+  - Tự động tạo tài khoản mới khi player join nếu Serial chưa tồn tại.
+  - Gọi `exports["character"]:loadPlayerCharacter(...)` để load nhân vật.
+- `resources\[core]\character\server.lua`:
+  - Tạo bảng `characters` nếu chưa có.
+  - Tạo nhân vật mới mặc định nếu chưa có record.
+  - Spawn player tại San Fierro, set tiền mặc định 5000$
+  - Lưu vị trí/skin/cash khi player quit.
 
-| Manager | Chức Năng |
-|---------|----------|
-| **chatmanager.zip** | Quản lý hệ thống chat server-wide |
-| **helpmanager.zip** | Quản lý help system |
-| **mapcycler.zip** | Tự động xoay map |
-| **mapmanager.zip** | Quản lý & load map |
-| **spawnmanager.zip** | Quản lý spawn point |
-| **teammanager.zip** | Quản lý team & faction |
-| **votemanager.zip** | Hệ thống vote server |
+### 🧩 Login UI
+- `resources\[core]\login_ui\client.lua` mở CEF browser và gửi sự kiện `onLoginSubmit`/`onRegisterSubmit`.
+- `resources\[core]\login_ui\server.lua`:
+  - Tạo bảng `my_accounts`, `my_characters`.
+  - Xử lý đăng ký: kiểm tra username/email, tạo account + character.
+  - Xử lý đăng nhập: so sánh password thô, spawn player và set tiền/sức khỏe/armor.
+  - Lưu dữ liệu user khi quit.
+- UI HTML đã được deploy trong `resources\[core]\login_ui\html\index.html`.
+
+### 💬 Chat & Roleplay
+- `resources\[core]\chat\server.lua`:
+  - Chat local trong 20m.
+  - Lệnh `/me` và `/do` với thông báo RP.
+  - Admin test command `/gotopos X Y Z` không kiểm tra quyền.
+
+### 🚗 Vehicle System
+- `resources\[core]\vehicle\server.lua`:
+  - Load vehicles từ DB `vehicles` khi resource start.
+  - Lệnh `/createvehicle`, `/lock`, `/engine`, `/seatbelt`, `/hood`, `/trunk`, `/lights`.
+  - Lưu vị trí và trạng thái khi resource stop.
+- `resources\[core]\vehicle_system\server.lua`:
+  - Fuel drain mỗi 10s khi xe nổ máy.
+  - Lệnh `/spawnveh`, `/despawnveh`, `/park`, `/refuel`, `/buyvehicle`, `/lockvehicle`.
+  - Hỗ trợ lock/unlock, engine toggle, seatbelt, hood/trunk bằng lệnh và sự kiện từ client.
+  - Lưu fuel khi resource stop hoặc khi cất xe.
+
+### 🚦 Traffic
+- `resources\[core]\traffic\server.lua` chỉ bật chế độ traffic light auto.
+
+---
+
+### 📂 Các Module Core Chi Tiết
+
+| Resource | Notes |
+|----------|-------|
+| `[core]/mysql` | Kết nối DB chung, export `getConnection()` |
+| `[core]/account` | Auto signup/login qua Serial |
+| `[core]/character` | Load + save char, spawn mặc định |
+| `[core]/login_ui` | CEF login/register UI - 2nd auth flow |
+| `[core]/chat` | Local chat + RP commands + uproot admin command |
+| `[core]/vehicle` | Persistent vehicle loading + owner command |
+| `[core]/vehicle_system` | Personal vehicle management, fuel, buy/spawn/despawn |
+| `[core]/traffic` | Traffic lights on auto |
+| `[core]/peds` | Basic ped server/client script |
+| `[core]/help_system` | help UI client stub |
+
+---
+
+### 🎯 Thực trạng chính xác
+- `Login` & `Character` đã hoạt động với 2 luồng: auto Serial và login UI.
+- `Vehicle` đã có hệ thống tính năng tương đối đầy đủ với DB persistence.
+- `Chat` đã có tính năng RP cơ bản.
+- `Inventory`, `Job`, `Economy`, `Property` chưa thấy code rõ ràng.
+- `Admin tools` có lệnh thử nghiệm, nhưng chưa có ACL/permission đầy đủ.
+
+---
+
+### ⚠️ Vấn đề cần giải quyết ngay
+- Đồng nhất hệ thống đăng nhập: `account/` vs `login_ui/`.
+- Mật khẩu lưu thô trong `login_ui` cần hash/salt.
+- Quyền admin hiện tại chưa có kiểm tra ACL.
+- Cần thống nhất DB schema để tránh duplicate account records.
+
+---
+
+### 🧪 Tình trạng phát triển
+
+| Tính năng | Trạng thái |
+|-----------|------------|
+| Auth cơ bản | Có, nhưng 2 luồng trùng lặp |
+| Character load/save | Hoạt động |
+| Roleplay chat | Hoạt động |
+| Vehicle persistence | Hoạt động |
+| Vehicle advanced | Hoạt động |
+| Traffic | Hoạt động cơ bản |
+| Web admin/GUI | Chưa đánh giá chi tiết |
+| Inventory | Chưa rõ |
+| Job/Economy | Chưa triển khai |
+| Property | Chưa triển khai |
+
+---
+
+### 🔄 Kế hoạch gộp lại ngay
+1. Chọn 1 hệ thống auth duy nhất.
+2. Viết lại `mysql` schema chung cho accounts/characters/vehicles.
+3. Tách `login_ui` thành front-end cho cùng backend `account`/`character`.
+4. Thêm permission check cho lệnh admin trong `chat` và `vehicle`.
+
+---
+
+### 🧩 Cập nhật nhanh cho roadmap
+- `MySQL connection` ổn, cần kiểm tra config `login_ui` và `mysql` cùng DB.
+- `Login/Register` đã có: auto Serial + HTML UI.
+- `Character management` đã có cơ bản.
+- `Chat` đã xong mức RP cơ bản.
+- `Vehicle` đã xong nhiều lệnh và persistence.
+- `Admin tools` cần xác thực quyền.
+
+---
+
+### 🎯 Tập trung tiếp theo
+- Consolidate auth/character database.
+- Hash password cho `login_ui`.
+- Kiểm tra DB `vehicles` schema và các cột tồn tại.
+- Test `createvehicle`, `spawnveh`, `despawnveh`, `refuel`, `park`.
 
 ---
 
@@ -367,13 +426,13 @@ Các manager module (7 modules .zip):
 ### Core Systems Status
 ```
 [x] Server base structure
-[ ] MySQL connection - Priority: CRITICAL
-[ ] Login system - Priority: CRITICAL
-[ ] Character management - Priority: CRITICAL
-[ ] Chat system - Priority: HIGH
+[x] MySQL connection - Priority: CRITICAL
+[x] Login system - Priority: CRITICAL (2 luồng: account + login_ui)
+[x] Character management - Priority: CRITICAL
+[x] Chat system - Priority: HIGH
 [ ] Inventory system - Priority: HIGH
-[ ] Vehicle system - Priority: HIGH
-[ ] Admin tools - Priority: HIGH
+[x] Vehicle system - Priority: HIGH
+[ ] Admin tools - Priority: HIGH (permission missing)
 [ ] Job system - Priority: MEDIUM
 [ ] Economy system - Priority: MEDIUM
 [ ] Property system - Priority: MEDIUM
@@ -508,25 +567,25 @@ Web Admin: Resources → Monitor → [resourcename]
 
 ### 👉 **This Week Priority:**
 
-1. **[CRITICAL]** Verify MySQL connection
-   - Test database connectivity
-   - Validate table schemas
-   - Check connection string
+1. **[CRITICAL]** Consolidate Authentication
+   - Decide dùng `account/` hay `login_ui/` làm chính
+   - Đồng bộ DB schema `accounts` / `characters` / `vehicles`
+   - Loại bỏ duplicate records và risk trùng lặp
 
-2. **[CRITICAL]** Test Login System
-   - Create test accounts
-   - Verify account persistence
-   - Test character creation
+2. **[CRITICAL]** Secure Login UI
+   - Hash/salt password trước khi lưu
+   - Kiểm tra `my_accounts`/`my_characters` và chuyển sang schema chung
+   - Test đăng ký + đăng nhập bằng UI
 
-3. **[HIGH]** Setup Admin Tools
-   - Implement basic admin commands
-   - Test ban/kick system
-   - Verify permission levels
+3. **[HIGH]** Verify Vehicle System
+   - Test `/createvehicle`, `/spawnveh`, `/despawnveh`, `/park`, `/refuel`
+   - Kiểm tra fuel drain và persistence
+   - Bổ sung permission/ACL nếu cần
 
-4. **[HIGH]** Configure Game Mode
-   - Choose primary gamemode (Deathmatch)
-   - Test spawn points
-   - Verify weapon distribution
+4. **[HIGH]** Validate Chat & Admin
+   - Test chat RP 20m, `/me`, `/do`
+   - Kiểm tra lệnh `/gotopos` và thêm kiểm tra quyền admin
+   - Xem lại `help_system` nếu cần hướng dẫn người chơi
 
 ### 📝 Quick Reference Files
 
@@ -537,10 +596,14 @@ Web Admin: Resources → Monitor → [resourcename]
 - `banlist.xml` - Banned players/IPs
 
 **Important Resource Files:**
-- `mysql/connection.lua` - DB connection
-- `core/login/` - Login system
-- `core/character/` - Character system
-- `admin/admin.lua` - Admin commands
+- `resources/[core]/mysql/connection.lua` - DB connection
+- `resources/[core]/account/` - Auto auth by Serial
+- `resources/[core]/login_ui/` - CEF login/register UI
+- `resources/[core]/character/` - Character load/save logic
+- `resources/[core]/chat/` - Roleplay chat and /me /do
+- `resources/[core]/vehicle/` - Persistent vehicle commands
+- `resources/[core]/vehicle_system/` - Advanced personal vehicle system
+- `resources/[admin]/admin/` - Admin source and configuration
 
 ---
 
@@ -561,7 +624,7 @@ Web Admin: Resources → Monitor → [resourcename]
 ## 📄 Version History
 
 **Current Version:** 1.0.0 - Development  
-**Last Updated:** 2026-05-26  
+**Last Updated:** 2026-05-27  
 **Status:** 🟡 **IN DEVELOPMENT - FOUNDATION PHASE**
 
 ---
