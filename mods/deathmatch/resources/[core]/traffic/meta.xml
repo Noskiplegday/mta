@@ -1,5 +1,0 @@
-<meta>
-    <info author="VanCanhCity" type="script" name="traffic" description="He thong xe co NPC"/>
-    <script src="server.lua" type="server"/>
-    <script src="client.lua" type="client"/>
-</meta>

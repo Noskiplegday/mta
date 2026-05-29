@@ -1,4 +1,5 @@
 <meta>
-    <info author="VanCanhCity" type="script" description="Hệ thống phương tiện cá nhân" />
+    <info author="GeminiCodeAssist" type="script" description="Hệ thống phím tắt xe và trợ giúp" />
     <script src="server.lua" type="server" />
+    <script src="cilent.lua" type="client" />
 </meta>

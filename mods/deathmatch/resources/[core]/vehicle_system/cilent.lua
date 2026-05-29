@@ -128,19 +128,50 @@ bindKey("F1", "down", function()
     playSoundFrontEnd(isHelpOpen and 11 or 12)
 end)
 
--- ─── KHU VỰC ĐỒNG BỘ PHÍM TẮT CHO XE ────────────────────
--- Tự động kích hoạt command cmd lên server khi người chơi nhấn nút tương ứng trên xe
-bindKey("m", "down", function()
-    if getPedOccupiedVehicle(localPlayer) then
-        executeCommandHandler("engine")
+-- ─── HỆ THỐNG PHÍM TẮT PHƯƠNG TIỆN MỚI ────────────────────
+local binds = {
+    ["k"] = function()
+        if getKeyState("lshift") or getKeyState("rshift") then
+            triggerServerEvent("vehicle:unlock", localPlayer)
+        else
+            triggerServerEvent("vehicle:lock", localPlayer)
+        end
+    end,
+
+    ["j"] = function()
+        triggerServerEvent("vehicle:engine", localPlayer)
+    end,
+
+    [","] = function()
+        if getKeyState("lshift") or getKeyState("rshift") then
+            triggerServerEvent("vehicle:hood", localPlayer)
+        end
+    end,
+
+    ["."] = function()
+        if getKeyState("lshift") or getKeyState("rshift") then
+            triggerServerEvent("vehicle:trunk", localPlayer)
+        end
+    end,
+
+    ["l"] = function()
+        if getKeyState("lshift") or getKeyState("rshift") then
+            triggerServerEvent("vehicle:lights", localPlayer)
+        end
+    end,
+
+    ["/"] = function()
+        if getKeyState("lshift") or getKeyState("rshift") then
+            triggerServerEvent("vehicle:radio", localPlayer)
+        end
     end
-end)
+}
 
-bindKey("k", "down", function()
-    -- Đứng gần hoặc ở trong xe đều bấm khóa được
-    executeCommandHandler("lock")
-end)
+for key, func in pairs(binds) do
+    bindKey(key, "down", func)
+end
 
+-- Giữ lại phím thắt dây an toàn riêng biệt (nếu muốn) hoặc có thể đưa vào bảng binds trên
 bindKey("g", "down", function()
     if getPedOccupiedVehicle(localPlayer) then
         executeCommandHandler("seatbelt")

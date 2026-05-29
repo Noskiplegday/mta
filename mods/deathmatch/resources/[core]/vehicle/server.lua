@@ -1,4 +1,5 @@
--- vcc_vehicle/server.lua
+
+-- vehicle/server.lua
 local spawnedVehicles = {} -- Bảng tạm để quản lý các xe đang chạy trên server
 
 function getDB()
@@ -7,6 +8,22 @@ function getDB()
         return exports["mysql"]:getConnection()
     end
     return false
+end
+
+-- Helper function to find the nearest vehicle
+local function getNearestVehicle(player, radius)
+    local x, y, z = getElementPosition(player)
+    local nearestVehicle = false
+    local minDist = radius or 5
+    for _, veh in ipairs(getElementsByType("vehicle")) do
+        local vx, vy, vz = getElementPosition(veh)
+        local dist = getDistanceBetweenPoints3D(x, y, z, vx, vy, vz)
+        if dist < minDist then
+            minDist = dist
+            nearestVehicle = veh
+        end
+    end
+    return nearestVehicle
 end
 
 -- 1. TỰ ĐỘNG SPAWN TẤT CẢ XE KHI SERVER KHỞI ĐỘNG
@@ -80,55 +97,46 @@ addCommandHandler("createvehicle", function(player, cmd, modelID)
 end)
 
 -- 3. LỆNH KHÓA/MỞ KHÓA XE (/lock)
-addCommandHandler("lock", function(player, cmd)
+function lockVehicle(player)
     local charID = getElementData(player, "char:id")
     if not charID then return end
 
-    local pX, pY, pZ = getElementPosition(player)
-    local targetVehicle = false
+    local veh = getPedOccupiedVehicle(player) or getNearestVehicle(player)
 
-    -- Ưu tiên kiểm tra nếu đang ngồi trong xe trước
-    local currentVeh = getPedOccupiedVehicle(player)
-    if currentVeh and getElementData(currentVeh, "veh:owner") == charID then
-        targetVehicle = currentVeh
-    else
-        -- Nếu đứng ngoài, tìm chiếc xe gần người chơi nhất trong bán kính 5 mét
-        for _, veh in ipairs(getElementsByType("vehicle")) do
-            local vX, vY, vZ = getElementPosition(veh)
-            if getDistanceBetweenPoints3D(pX, pY, pZ, vX, vY, vZ) <= 5 then
-                if getElementData(veh, "veh:owner") == charID then
-                    targetVehicle = veh
-                    break
-                end
-            end
-        end
-    end
-
-    if targetVehicle then
-        local currentLock = getElementData(targetVehicle, "veh:locked") or 0
-        local vehID = getElementData(targetVehicle, "veh:id")
+    if veh and getElementData(veh, "veh:owner") == charID then
+        setElementData(veh, "veh:locked", 1)
+        setVehicleLocked(veh, true)
+        outputChatBox("#FF4444* Bạn đã KHÓA cửa chiếc xe của mình. *", player, 255, 255, 255, true)
+        
         local db = getDB()
-
-        if currentLock == 0 then
-            -- Tiến hành khóa
-            setElementData(targetVehicle, "veh:locked", 1)
-            setVehicleLocked(targetVehicle, true)
-            outputChatBox("#FF9900* Bạn đã KHÓA cửa chiếc xe của mình. *", player, 255, 255, 255, true)
-            if db then dbExec(db, "UPDATE vehicles SET locked = 1 WHERE id = ?", vehID) end
-        else
-            -- Tiến hành mở khóa
-            setElementData(targetVehicle, "veh:locked", 0)
-            setVehicleLocked(targetVehicle, false)
-            outputChatBox("#00FF00* Bạn đã MỞ KHÓA cửa chiếc xe của mình. *", player, 255, 255, 255, true)
-            if db then dbExec(db, "UPDATE vehicles SET locked = 0 WHERE id = ?", vehID) end
-        end
+        if db then dbExec(db, "UPDATE vehicles SET locked = 1 WHERE id = ?", getElementData(veh, "veh:id")) end
     else
         outputChatBox("#FF0000[Lỗi] Không tìm thấy xe của bạn ở gần đây!", player, 255, 255, 255, true)
     end
-end)
+end
+addCommandHandler("lock", lockVehicle)
 
--- 4. LỆNH BẬT / TẮT ĐỘNG CƠ XE (/engine)
-addCommandHandler("engine", function(player, cmd)
+function unlockVehicle(player)
+    local charID = getElementData(player, "char:id")
+    if not charID then return end
+
+    local veh = getPedOccupiedVehicle(player) or getNearestVehicle(player)
+
+    if veh and getElementData(veh, "veh:owner") == charID then
+        setElementData(veh, "veh:locked", 0)
+        setVehicleLocked(veh, false)
+        outputChatBox("#00FF00* Bạn đã MỞ KHÓA cửa chiếc xe của mình. *", player, 255, 255, 255, true)
+        
+        local db = getDB()
+        if db then dbExec(db, "UPDATE vehicles SET locked = 0 WHERE id = ?", getElementData(veh, "veh:id")) end
+    else
+        outputChatBox("#FF0000[Lỗi] Không tìm thấy xe của bạn ở gần đây!", player, 255, 255, 255, true)
+    end
+end
+addCommandHandler("unlock", unlockVehicle)
+
+-- 4. LOGIC ĐỘNG CƠ XE
+function toggleEngine(player)
     local veh = getPedOccupiedVehicle(player)
     if not veh then 
         outputChatBox("#FF0000[Lỗi] Bạn phải ngồi trên xe mới có thể bật/tắt động cơ!", player, 255, 255, 255, true)
@@ -152,7 +160,8 @@ addCommandHandler("engine", function(player, cmd)
         setVehicleEngineState(veh, true)
         outputChatBox("#00FF00* Động cơ phương tiện đã được khởi động. *", player, 255, 255, 255, true)
     end
-end)
+end
+addCommandHandler("engine", toggleEngine)
 
 -- 5. LỆNH THẮT DÂY AN TOÀN (/seatbelt)
 addCommandHandler("seatbelt", function(player, cmd)
@@ -174,36 +183,46 @@ addCommandHandler("seatbelt", function(player, cmd)
 end)
 
 -- 6. LỆNH MỞ/ĐÓNG NẮP CAPO (/hood)
-addCommandHandler("hood", function(player, cmd)
-    local veh = getPedOccupiedVehicle(player)
-    if not veh then return end
-    if getVehicleController(veh) ~= player then return end
+function toggleHood(player)
+    local veh = getPedOccupiedVehicle(player) or getNearestVehicle(player)
 
-    local currentRatio = getVehicleOpenRatio(veh, 0) -- Khớp số 0 là nắp Capo (Hood)
-    if currentRatio == 0 then
-        setVehicleOpenRatio(veh, 0, 1, 500) -- Mở ra trong 500ms
-        outputChatBox("#00FF00* Bạn đã mở nắp capo xe. *", player, 255, 255, 255, true)
-    else
-        setVehicleOpenRatio(veh, 0, 0, 500) -- Đóng lại
-        outputChatBox("#FF9900* Bạn đã đóng nắp capo xe. *", player, 255, 255, 255, true)
+    if not veh then
+        outputChatBox("#FF4444Không có xe gần bạn!", player, 255, 255, 255, true)
+        return
     end
-end)
+
+    local ratio = getVehicleDoorOpenRatio(veh, 0)
+
+    if ratio > 0 then
+        setVehicleDoorOpenRatio(veh, 0, 0, 1000)
+        outputChatBox("#FF4444Đã đóng capo.", player, 255, 255, 255, true)
+    else
+        setVehicleDoorOpenRatio(veh, 0, 1, 1000)
+        outputChatBox("#00FF00Đã mở capo.", player, 255, 255, 255, true)
+    end
+end
+addCommandHandler("hood", toggleHood)
 
 -- 7. LỆNH MỞ/ĐÓNG CỐP XE (/trunk)
-addCommandHandler("trunk", function(player, cmd)
-    local veh = getPedOccupiedVehicle(player)
-    if not veh then return end
-    if getVehicleController(veh) ~= player then return end
+function toggleTrunk(player)
+    local veh = getPedOccupiedVehicle(player) or getNearestVehicle(player)
 
-    local currentRatio = getVehicleOpenRatio(veh, 1) -- Khớp số 1 là Cốp xe (Trunk)
-    if currentRatio == 0 then
-        setVehicleOpenRatio(veh, 1, 1, 500)
-        outputChatBox("#00FF00* Bạn đã mở cốp xe. *", player, 255, 255, 255, true)
-    else
-        setVehicleOpenRatio(veh, 1, 0, 500)
-        outputChatBox("#FF9900* Bạn đã đóng cốp xe. *", player, 255, 255, 255, true)
+    if not veh then
+        outputChatBox("#FF4444Không có xe gần bạn!", player, 255, 255, 255, true)
+        return
     end
-end)
+
+    local ratio = getVehicleDoorOpenRatio(veh, 1)
+
+    if ratio > 0 then
+        setVehicleDoorOpenRatio(veh, 1, 0, 1000)
+        outputChatBox("#FF4444Đã đóng cốp.", player, 255, 255, 255, true)
+    else
+        setVehicleDoorOpenRatio(veh, 1, 1, 1000)
+        outputChatBox("#00FF00Đã mở cốp.", player, 255, 255, 255, true)
+    end
+end
+addCommandHandler("trunk", toggleTrunk)
 
 -- 8. LỆNH BẬT/TẮT ĐÈN XE THỦ CÔNG (/lights)
 addCommandHandler("lights", function(player, cmd)
@@ -236,4 +255,63 @@ addEventHandler("onResourceStop", resourceRoot, function()
         end
     end
     outputDebugString("[VEHICLE] Da luu lai toan bo vi tri xe vao database truoc khi tat resource!")
+end)
+
+addEvent("vehicle:lock", true)
+addEvent("vehicle:unlock", true)
+addEvent("vehicle:engine", true)
+addEvent("vehicle:hood", true)
+addEvent("vehicle:trunk", true)
+addEvent("vehicle:lights", true)
+addEvent("vehicle:radio", true)
+
+addEventHandler("vehicle:lock", root, function()
+    -- Sử dụng lại function lockVehicle đã viết ở trên để đồng bộ Logic và Database
+    lockVehicle(source)
+end)
+
+addEventHandler("vehicle:unlock", root, function()
+    -- Sử dụng lại function unlockVehicle để đồng bộ Logic và Database
+    unlockVehicle(source)
+end)
+
+addEventHandler("vehicle:engine", root, function()
+    toggleEngine(source)
+end)
+
+addEventHandler("vehicle:hood", root, function()
+    toggleHood(source)
+end)
+
+addEventHandler("vehicle:trunk", root, function()
+    toggleTrunk(source)
+end)
+
+addEventHandler("vehicle:lights", root, function()
+    local veh = getPedOccupiedVehicle(source)
+    if not veh then return end
+
+    local state = getVehicleOverrideLights(veh)
+    if state == 2 then
+        setVehicleOverrideLights(veh, 1)
+        outputChatBox("#FF4444Đã tắt đèn.", source, 255, 255, 255, true)
+    else
+        setVehicleOverrideLights(veh, 2)
+        outputChatBox("#00FF00Đã bật đèn.", source, 255, 255, 255, true)
+    end
+end)
+
+addEventHandler("vehicle:radio", root, function()
+    local veh = getPedOccupiedVehicle(source)
+    if not veh then return end
+
+    local radio = getElementData(veh, "vehicle:radio")
+    radio = not radio
+    setElementData(veh, "vehicle:radio", radio)
+
+    if radio then
+        outputChatBox("#00FF00Radio đã bật.", source, 255, 255, 255, true)
+    else
+        outputChatBox("#FF4444Radio đã tắt.", source, 255, 255, 255, true)
+    end
 end)
